@@ -262,6 +262,12 @@ Base path `/api`. JSON in and out.
 | sortBy                        | fullName | fullName, annualSalary, hireDate                     |
 | sortOrder                     | asc      | asc, desc                                            |
 
+- Search is a "contains" match. `%`, `_` and `\` in the search are plain characters, not wildcards
+- Filters and search combine with AND
+- Sorting by name ignores upper and lower case
+- Every sort ends with `id`, so rows with the same salary or date keep one order and never show up on two pages
+- A page past the end returns no rows and the real `total`
+
 ### List response
 
 ```json
