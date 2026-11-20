@@ -12,13 +12,16 @@ Parts 2 to 11 are the build spec.
 ## Part 1. Requirements (one page)
 
 ### Goal
+
 Give ACME's HR manager one web app to manage salary data for 10,000 employees across several countries, and to answer questions about how the company pays people.
 Today this lives in Excel sheets, which is slow to search, easy to break and hard to analyse.
 
 ### User
+
 One persona: the HR manager. They are not technical. They want to find a person fast, fix a salary, and see how pay compares across countries, departments and job titles.
 
 ### In scope
+
 1. Employee directory
    - List all employees with server side pagination
    - Search by name or email
@@ -39,16 +42,18 @@ One persona: the HR manager. They are not technical. They want to find a person 
    - Web app on Vercel, API and database on a VPS, plus a short video demo
 
 ### Deliberately left out
-| Left out | Why |
-| --- | --- |
-| Login and roles | One persona and demo data only. First thing to add before real use. |
-| Excel / CSV import and export | The most useful next feature, since HR lives in Excel today. Left out to keep the core solid first. |
-| Payroll, tax, payslips | A different product. This app manages salary data, it does not pay people. |
+
+| Left out                                                | Why                                                                                                                          |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Login and roles                                         | One persona and demo data only. First thing to add before real use.                                                          |
+| Excel / CSV import and export                           | The most useful next feature, since HR lives in Excel today. Left out to keep the core solid first.                          |
+| Payroll, tax, payslips                                  | A different product. This app manages salary data, it does not pay people.                                                   |
 | Currency conversion and org wide totals in one currency | Rates change every day, so a single total would be wrong or misleading. Every number stays in the employee's local currency. |
-| Salary history and audit log | Useful, but not needed to answer the core pay questions. Edits overwrite the current value. |
-| Bonuses, equity, allowances | Only base annual salary is modelled. |
+| Salary history and audit log                            | Useful, but not needed to answer the core pay questions. Edits overwrite the current value.                                  |
+| Bonuses, equity, allowances                             | Only base annual salary is modelled.                                                                                         |
 
 ### Success means
+
 - The HR manager can find any of the 10,000 employees in a few seconds
 - They can answer "what do we pay a Senior Software Engineer in India" without a spreadsheet
 - Every list and insight responds in well under a second on the seeded data
@@ -58,48 +63,52 @@ One persona: the HR manager. They are not technical. They want to find a person 
 ## Part 2. Domain
 
 ### Employee
-| Field | Type | Rules |
-| --- | --- | --- |
-| id | integer | generated |
-| fullName | string | required, 2 to 100 chars, trimmed |
-| email | string | required, valid email, unique, stored lower case |
-| country | enum | one of the supported countries |
-| currency | enum | derived from country on the server, never sent by the client |
-| department | enum | one of the departments |
-| jobTitle | enum | one of the job titles, and must belong to the chosen department |
-| annualSalary | integer | whole units of the local currency, 1 to 100,000,000 |
-| hireDate | date | required, not in the future |
-| createdAt, updatedAt | timestamp | set by the server |
+
+| Field                | Type      | Rules                                                           |
+| -------------------- | --------- | --------------------------------------------------------------- |
+| id                   | integer   | generated                                                       |
+| fullName             | string    | required, 2 to 100 chars, trimmed                               |
+| email                | string    | required, valid email, unique, stored lower case                |
+| country              | enum      | one of the supported countries                                  |
+| currency             | enum      | derived from country on the server, never sent by the client    |
+| department           | enum      | one of the departments                                          |
+| jobTitle             | enum      | one of the job titles, and must belong to the chosen department |
+| annualSalary         | integer   | whole units of the local currency, 1 to 100,000,000             |
+| hireDate             | date      | required, not in the future                                     |
+| createdAt, updatedAt | timestamp | set by the server                                               |
 
 ### Countries and currencies
-| Country | Code | Currency |
-| --- | --- | --- |
-| India | IN | INR |
-| United States | US | USD |
-| United Kingdom | GB | GBP |
-| Germany | DE | EUR |
-| Canada | CA | CAD |
-| Australia | AU | AUD |
-| Singapore | SG | SGD |
-| Brazil | BR | BRL |
+
+| Country        | Code | Currency |
+| -------------- | ---- | -------- |
+| India          | IN   | INR      |
+| United States  | US   | USD      |
+| United Kingdom | GB   | GBP      |
+| Germany        | DE   | EUR      |
+| Canada         | CA   | CAD      |
+| Australia      | AU   | AUD      |
+| Singapore      | SG   | SGD      |
+| Brazil         | BR   | BRL      |
 
 ### Departments and job titles
-| Department | Job titles |
-| --- | --- |
-| Engineering | Software Engineer, Senior Software Engineer, Staff Engineer, Engineering Manager, QA Engineer |
-| Product | Product Manager, Senior Product Manager |
-| Design | Product Designer, Senior Product Designer |
-| Data | Data Analyst, Data Scientist |
-| Sales | Sales Representative, Account Executive, Sales Manager |
-| Marketing | Marketing Specialist, Marketing Manager |
-| Customer Support | Support Specialist, Support Team Lead |
-| Finance | Accountant, Finance Manager |
-| People | HR Generalist, HR Manager |
-| Operations | Operations Specialist, Operations Manager |
+
+| Department       | Job titles                                                                                    |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| Engineering      | Software Engineer, Senior Software Engineer, Staff Engineer, Engineering Manager, QA Engineer |
+| Product          | Product Manager, Senior Product Manager                                                       |
+| Design           | Product Designer, Senior Product Designer                                                     |
+| Data             | Data Analyst, Data Scientist                                                                  |
+| Sales            | Sales Representative, Account Executive, Sales Manager                                        |
+| Marketing        | Marketing Specialist, Marketing Manager                                                       |
+| Customer Support | Support Specialist, Support Team Lead                                                         |
+| Finance          | Accountant, Finance Manager                                                                   |
+| People           | HR Generalist, HR Manager                                                                     |
+| Operations       | Operations Specialist, Operations Manager                                                     |
 
 These lists live in `packages/shared` as constants. The API, the seed and the web app all read from there.
 
 ### Insight definitions
+
 - Average: arithmetic mean, rounded to the nearest whole unit
 - Median: `percentile_cont(0.5)` over the group, rounded to the nearest whole unit
 - A group with no employees is not returned
@@ -111,20 +120,22 @@ These lists live in `packages/shared` as constants. The API, the seed and the we
 ## Part 3. Architecture
 
 ### Stack
+
 All TypeScript.
 
-| Part | Choice |
-| --- | --- |
-| Monorepo | pnpm workspaces + Turborepo |
-| Web | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query |
-| API | Express |
-| Database | PostgreSQL + Drizzle ORM |
-| Validation | Zod, shared by API and web |
-| Tests | Vitest, Supertest, PGlite (Postgres in process) |
-| CI | GitHub Actions |
-| Hosting | Vercel (web), own VPS (API + PostgreSQL) |
+| Part       | Choice                                                        |
+| ---------- | ------------------------------------------------------------- |
+| Monorepo   | pnpm workspaces + Turborepo                                   |
+| Web        | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query |
+| API        | Express                                                       |
+| Database   | PostgreSQL + Drizzle ORM                                      |
+| Validation | Zod, shared by API and web                                    |
+| Tests      | Vitest, Supertest, PGlite (Postgres in process)               |
+| CI         | GitHub Actions                                                |
+| Hosting    | Vercel (web), own VPS (API + PostgreSQL)                      |
 
 ### Repo layout
+
 ```
 apps/
   api/                 Express API
@@ -160,6 +171,7 @@ docs/
 ```
 
 ### Request flow
+
 ```mermaid
 flowchart LR
   UI[Next.js page] --> Hook[Query hook]
@@ -175,6 +187,7 @@ flowchart LR
 ```
 
 ### Layer rules
+
 - Routes only map URLs to controllers
 - Controllers never contain business rules or SQL
 - Services never import Express or Drizzle query builders directly, they call repositories
@@ -188,21 +201,23 @@ flowchart LR
 ## Part 4. Data model
 
 ### Table `employees`
-| Column | Type | Notes |
-| --- | --- | --- |
-| id | serial primary key | |
-| full_name | varchar(100) not null | |
-| email | varchar(255) not null unique | lower case |
-| country | char(2) not null | ISO code |
-| currency | char(3) not null | derived from country |
-| department | varchar(50) not null | |
-| job_title | varchar(80) not null | |
-| annual_salary | integer not null | check > 0 |
-| hire_date | date not null | |
-| created_at | timestamptz not null default now() | |
-| updated_at | timestamptz not null default now() | |
+
+| Column        | Type                               | Notes                |
+| ------------- | ---------------------------------- | -------------------- |
+| id            | serial primary key                 |                      |
+| full_name     | varchar(100) not null              |                      |
+| email         | varchar(255) not null unique       | lower case           |
+| country       | char(2) not null                   | ISO code             |
+| currency      | char(3) not null                   | derived from country |
+| department    | varchar(50) not null               |                      |
+| job_title     | varchar(80) not null               |                      |
+| annual_salary | integer not null                   | check > 0            |
+| hire_date     | date not null                      |                      |
+| created_at    | timestamptz not null default now() |                      |
+| updated_at    | timestamptz not null default now() |                      |
 
 ### Indexes
+
 - `(country, job_title)` for insights and filters
 - `(country, department)` for insights and filters
 - `(department)`, `(job_title)` for filters without a country
@@ -218,34 +233,49 @@ Migrations are generated with drizzle-kit and committed.
 Base path `/api`. JSON in and out.
 
 ### Endpoints
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | /health | liveness check |
-| GET | /api/meta | countries with currency, departments with job titles |
-| GET | /api/employees | list with pagination, search, filters, sort |
-| GET | /api/employees/:id | one employee |
-| POST | /api/employees | create |
-| PATCH | /api/employees/:id | partial update |
-| DELETE | /api/employees/:id | delete |
-| GET | /api/insights/countries | stats per country |
-| GET | /api/insights/countries/:country/job-titles | stats per job title in a country |
-| GET | /api/insights/countries/:country/departments | headcount and cost per department in a country |
-| GET | /api/insights/countries/:country/underpaid | underpaid employees in a country, `?threshold=0.8` |
+
+| Method | Path                                         | Purpose                                              |
+| ------ | -------------------------------------------- | ---------------------------------------------------- |
+| GET    | /health                                      | liveness check                                       |
+| GET    | /api/meta                                    | countries with currency, departments with job titles |
+| GET    | /api/employees                               | list with pagination, search, filters, sort          |
+| GET    | /api/employees/:id                           | one employee                                         |
+| POST   | /api/employees                               | create                                               |
+| PATCH  | /api/employees/:id                           | partial update                                       |
+| DELETE | /api/employees/:id                           | delete                                               |
+| GET    | /api/insights/countries                      | stats per country                                    |
+| GET    | /api/insights/countries/:country/job-titles  | stats per job title in a country                     |
+| GET    | /api/insights/countries/:country/departments | headcount and cost per department in a country       |
+| GET    | /api/insights/countries/:country/underpaid   | underpaid employees in a country, `?threshold=0.8`   |
 
 ### List query params
-| Param | Default | Rules |
-| --- | --- | --- |
-| page | 1 | integer >= 1 |
-| pageSize | 25 | one of 10, 25, 50, 100 |
-| search | | matches name or email, case insensitive, min 2 chars |
-| country, department, jobTitle | | must be valid values |
-| sortBy | fullName | fullName, annualSalary, hireDate |
-| sortOrder | asc | asc, desc |
+
+| Param                         | Default  | Rules                                                |
+| ----------------------------- | -------- | ---------------------------------------------------- |
+| page                          | 1        | integer >= 1                                         |
+| pageSize                      | 25       | one of 10, 25, 50, 100                               |
+| search                        |          | matches name or email, case insensitive, min 2 chars |
+| country, department, jobTitle |          | must be valid values                                 |
+| sortBy                        | fullName | fullName, annualSalary, hireDate                     |
+| sortOrder                     | asc      | asc, desc                                            |
 
 ### List response
+
 ```json
 {
-  "data": [{ "id": 1, "fullName": "Asha Patel", "email": "asha.patel@acme.test", "country": "IN", "currency": "INR", "department": "Engineering", "jobTitle": "Software Engineer", "annualSalary": 1800000, "hireDate": "2022-04-11" }],
+  "data": [
+    {
+      "id": 1,
+      "fullName": "Asha Patel",
+      "email": "asha.patel@acme.test",
+      "country": "IN",
+      "currency": "INR",
+      "department": "Engineering",
+      "jobTitle": "Software Engineer",
+      "annualSalary": 1800000,
+      "hireDate": "2022-04-11"
+    }
+  ],
   "page": 1,
   "pageSize": 25,
   "total": 10000
@@ -253,31 +283,42 @@ Base path `/api`. JSON in and out.
 ```
 
 ### Errors
+
 Every error has the same body:
+
 ```json
-{ "error": { "code": "VALIDATION_ERROR", "message": "Invalid request", "details": [{ "path": "email", "message": "Enter a valid email" }] } }
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request",
+    "details": [{ "path": "email", "message": "Enter a valid email" }]
+  }
+}
 ```
-| Code | Status | When |
-| --- | --- | --- |
-| VALIDATION_ERROR | 400 | body or query fails the Zod schema |
-| NOT_FOUND | 404 | employee id does not exist |
-| EMAIL_TAKEN | 409 | email already used by another employee |
-| INTERNAL_ERROR | 500 | anything unexpected, no stack trace in the body |
+
+| Code             | Status | When                                            |
+| ---------------- | ------ | ----------------------------------------------- |
+| VALIDATION_ERROR | 400    | body or query fails the Zod schema              |
+| NOT_FOUND        | 404    | employee id does not exist                      |
+| EMAIL_TAKEN      | 409    | email already used by another employee          |
+| INTERNAL_ERROR   | 500    | anything unexpected, no stack trace in the body |
 
 ---
 
 ## Part 6. Web app
 
 ### Pages
-| Route | What it shows |
-| --- | --- |
-| `/` | redirects to `/employees` |
-| `/employees` | table, search box, filters, sort, pagination |
-| `/employees/new` | create form |
-| `/employees/[id]/edit` | edit form, delete button with confirm dialog |
-| `/insights` | country picker, country stats table, job title and department tables, underpaid list |
+
+| Route                  | What it shows                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `/`                    | redirects to `/employees`                                                            |
+| `/employees`           | table, search box, filters, sort, pagination                                         |
+| `/employees/new`       | create form                                                                          |
+| `/employees/[id]/edit` | edit form, delete button with confirm dialog                                         |
+| `/insights`            | country picker, country stats table, job title and department tables, underpaid list |
 
 ### Rules
+
 - Filters, search, sort and page live in the URL query, so a view can be shared and the back button works
 - Search input is debounced (300 ms)
 - Every data view has loading, empty and error states
@@ -305,14 +346,14 @@ Every error has the same body:
 
 Tests are fast, deterministic and readable. Each one checks one behaviour, named in plain English.
 
-| Layer | What | How |
-| --- | --- | --- |
-| shared | Zod schemas, job title belongs to department, country to currency | plain unit tests |
-| services | create, update, delete rules, email taken, not found, insight maths | real Postgres via PGlite, fresh schema per test file, tables cleared per test |
-| repositories | list filters, search, sort, pagination, insight queries | PGlite with small hand made fixtures where the expected numbers are worked out by hand |
-| API | status codes, error body shape, query param validation | Supertest against `app.ts` with PGlite |
-| seed | 10,000 rows, same first employee on every run, valid data | PGlite |
-| web | form validation and job title dependency, a hook with a mocked client | Vitest + React Testing Library |
+| Layer        | What                                                                  | How                                                                                    |
+| ------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| shared       | Zod schemas, job title belongs to department, country to currency     | plain unit tests                                                                       |
+| services     | create, update, delete rules, email taken, not found, insight maths   | real Postgres via PGlite, fresh schema per test file, tables cleared per test          |
+| repositories | list filters, search, sort, pagination, insight queries               | PGlite with small hand made fixtures where the expected numbers are worked out by hand |
+| API          | status codes, error body shape, query param validation                | Supertest against `app.ts` with PGlite                                                 |
+| seed         | 10,000 rows, same first employee on every run, valid data             | PGlite                                                                                 |
+| web          | form validation and job title dependency, a hook with a mocked client | Vitest + React Testing Library                                                         |
 
 Work is test first where it makes sense: a failing test commit, then the code that makes it pass.
 CI runs lint, typecheck and tests on every PR.
@@ -332,12 +373,12 @@ CI runs lint, typecheck and tests on every PR.
 
 ## Part 10. Deployment
 
-| Part | Where | How |
-| --- | --- | --- |
-| Web | Vercel | connected to the GitHub repo, root `apps/web`, env `NEXT_PUBLIC_API_URL` |
-| API | VPS | Docker Compose: API container + PostgreSQL container |
-| Database | VPS | PostgreSQL in Docker with a named volume, not exposed to the internet |
-| HTTPS + routing | VPS | the Caddy that already serves `dharmjeet.com` |
+| Part            | Where  | How                                                                      |
+| --------------- | ------ | ------------------------------------------------------------------------ |
+| Web             | Vercel | connected to the GitHub repo, root `apps/web`, env `NEXT_PUBLIC_API_URL` |
+| API             | VPS    | Docker Compose: API container + PostgreSQL container                     |
+| Database        | VPS    | PostgreSQL in Docker with a named volume, not exposed to the internet    |
+| HTTPS + routing | VPS    | the Caddy that already serves `dharmjeet.com`                            |
 
 - Public API URL: `https://dharmjeet.com/salary-management`, so a list call is `https://dharmjeet.com/salary-management/api/employees`
 - Caddy sends `/salary-management/*` to the API container and strips the prefix (`handle_path`), so Express keeps plain routes like `/api/employees` and `/health`. Everything else on `dharmjeet.com` stays with the portfolio
@@ -381,5 +422,6 @@ Each line becomes one GitHub issue, done in this order.
 ---
 
 ## Decisions log
+
 - Repo is public from day one, so the issues, PRs and history are visible
 - API lives under `dharmjeet.com/salary-management` behind the existing Caddy, no new domain needed
