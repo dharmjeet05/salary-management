@@ -397,27 +397,35 @@ CI runs lint, typecheck and tests on every PR.
 
 ## Part 10. Deployment
 
-| Part            | Where  | How                                                                      |
-| --------------- | ------ | ------------------------------------------------------------------------ |
-| Web             | Vercel | connected to the GitHub repo, root `apps/web`, env `NEXT_PUBLIC_API_URL` |
-| API             | VPS    | Docker Compose: API container + PostgreSQL container                     |
-| Database        | VPS    | PostgreSQL in Docker with a named volume, not exposed to the internet    |
-| HTTPS + routing | VPS    | the Caddy that already serves `dharmjeet.com`                            |
+| Part            | Where  | How                                                                                    |
+| --------------- | ------ | -------------------------------------------------------------------------------------- |
+| Web             | Vercel | connected to the GitHub repo, root `apps/web`, env `NEXT_PUBLIC_API_URL`               |
+| API             | VPS    | a Docker image built from the root `Dockerfile`, container `salary-management`         |
+| Database        | VPS    | PostgreSQL 18 in Docker, container `salary-management-db`, a named volume, no ports    |
+| HTTPS + routing | VPS    | the Caddy container that already serves `dharmjeet.com`, on the docker network `proxy` |
+
+The VPS follows the private infra repo (`dharmjeet05/infra`): Caddy is the only container that publishes ports, apps join the external `proxy` network and Caddy reaches them by container name. The compose file and `.env` for this app live there, in `apps/salary-management/`, not in this repo.
 
 - Public API URL: `https://dharmjeet.com/salary-management`, so a list call is `https://dharmjeet.com/salary-management/api/employees`
 - Caddy sends `/salary-management/*` to the API container and strips the prefix (`handle_path`), so Express keeps plain routes like `/api/employees` and `/health`. Everything else on `dharmjeet.com` stays with the portfolio
   ```
   dharmjeet.com {
+    encode zstd gzip
     handle_path /salary-management/* {
-      reverse_proxy 127.0.0.1:4000
+      reverse_proxy salary-management:4000
     }
-    # existing portfolio config stays below
+    handle {
+      reverse_proxy dharmjeet-web:3000
+    }
   }
   ```
-- The API container publishes only `127.0.0.1:4000`, so it is reachable through Caddy and not directly from the internet
-- API env: `DATABASE_URL`, `PORT`, `CORS_ORIGIN` (the Vercel URL)
-- Migrations run on API start. Seed runs once by hand on the server
-- Deploy: `git pull && docker compose up -d --build` on the VPS. CD is out of scope
+- The API publishes no ports. Only Caddy reaches it, over `proxy`. The database sits on its own internal network that only the API joins
+- API env: `DATABASE_URL`, `PORT`, `CORS_ORIGIN` (the Vercel URL), `BUILD_TAG` (the commit, sent back as the `X-Build` header)
+- The image runs pending migrations, then starts the API. A `HEALTHCHECK` calls `/health`, and the infra `deploy.sh` waits for it
+- The API stops cleanly on `SIGTERM`: it finishes open requests and closes the database pool
+- Seed runs once by hand on the server: `docker exec salary-management node dist/seed.js`. It replaces all employees with the seeded 10,000
+- Deploy: `/opt/vps/infra/scripts/deploy.sh salary-management` on the VPS. It pulls, builds the image tagged with the commit, backs up the database and starts it. CD is out of scope
+- Steps for the VPS and Vercel: `docs/deploy.md`
 - The demo video shows the deployed app, not localhost
 
 ---
@@ -440,7 +448,7 @@ Each line becomes one GitHub issue, done in this order.
 12. Web: employees list page with URL state
 13. Web: create and edit form, delete with confirm
 14. Web: insights page
-15. Deploy: Dockerfile, Docker Compose on the VPS, Caddy route for `/salary-management`, Vercel project
+15. Deploy: Dockerfile, compose and Caddy route in the infra repo, Vercel project
 16. Docs: README with live links and demo video, architecture diagram, `ai-usage.md`, `tradeoffs.md`
 
 ---
