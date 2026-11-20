@@ -72,7 +72,7 @@ export const updateEmployeeSchema = z
   .object(employeeFields)
   .partial()
   .refine(
-    (value) => Object.values(value).some((field) => field !== undefined),
+    (value) => Object.values<unknown>(value).some((field) => field !== undefined),
     'Send at least one field to change',
   )
   .superRefine(checkJobTitleInDepartment)
