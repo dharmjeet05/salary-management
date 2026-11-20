@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { changeListParams, readListParams, writeListParams } from './list-params'
+import { changeListParams, readListParams, sortChange, writeListParams } from './list-params'
 
 const defaults = readListParams(new URLSearchParams())
 
@@ -76,5 +76,15 @@ describe('changing the list', () => {
       sortBy: 'fullName',
       sortOrder: 'asc',
     })
+  })
+})
+
+describe('sorting by a column', () => {
+  it('sorts a new column a to z first', () => {
+    expect(sortChange(defaults, 'hireDate')).toEqual({ sortBy: 'hireDate', sortOrder: 'asc' })
+  })
+
+  it('flips the order when the same column is picked again', () => {
+    expect(sortChange(defaults, 'fullName')).toEqual({ sortBy: 'fullName', sortOrder: 'desc' })
   })
 })
