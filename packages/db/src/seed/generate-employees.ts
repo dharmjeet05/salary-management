@@ -16,6 +16,7 @@ import {
 } from './seed-data'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+const UNDERPAID_SHARE = 0.03
 
 // Exact counts per country from the shares. Rounding leftovers go to the
 // first country, so the total is always `count`.
@@ -55,7 +56,10 @@ export function generateEmployees({ count, seed }: { count: number; seed: number
         weight: JOB_TITLE_SEED[title].weight,
       })),
     )
-    const spread = 0.85 + random.next() * 0.3
+    // A few people sit well under their band, so the underpaid insight has
+    // real cases. Everyone else is within 15% of it.
+    const isUnderpaid = random.next() < UNDERPAID_SHARE
+    const spread = isUnderpaid ? 0.6 + random.next() * 0.18 : 0.85 + random.next() * 0.3
     const salary = JOB_TITLE_SEED[jobTitle].baseUsd * place.costFactor * place.usdRate * spread
     return {
       fullName: `${firstName} ${lastName}`,
