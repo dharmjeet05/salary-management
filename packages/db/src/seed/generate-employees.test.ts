@@ -73,4 +73,30 @@ describe('generating seed employees', () => {
     }
     expect(average('Staff Engineer')).toBeGreaterThan(average('Software Engineer'))
   })
+
+  it('puts some people well under the median of their country and job title', () => {
+    const groups = new Map<string, number[]>()
+    for (const employee of employees) {
+      const key = `${employee.country} ${employee.jobTitle}`
+      groups.set(key, [...(groups.get(key) ?? []), employee.annualSalary])
+    }
+    let underpaid = 0
+    for (const salaries of groups.values()) {
+      const sorted = [...salaries].sort((a, b) => a - b)
+      const median = sorted[Math.floor(sorted.length / 2)] ?? 0
+      underpaid += salaries.filter((salary) => salary < 0.8 * median).length
+    }
+    // about 3% of 10,000 by design, with room for the random draw
+    expect(underpaid).toBeGreaterThan(200)
+  })
+
+  it('pays a software engineer in india between 15 and 30 lakh rupees on the median', () => {
+    const salaries = employees
+      .filter((employee) => employee.country === 'IN' && employee.jobTitle === 'Software Engineer')
+      .map((employee) => employee.annualSalary)
+      .sort((a, b) => a - b)
+    const median = salaries[Math.floor(salaries.length / 2)] ?? 0
+    expect(median).toBeGreaterThan(1_500_000)
+    expect(median).toBeLessThan(3_000_000)
+  })
 })
