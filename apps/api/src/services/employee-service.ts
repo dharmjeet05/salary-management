@@ -38,24 +38,26 @@ export function createEmployeeService(repository: EmployeeRepository) {
     },
 
     async update(id: number, input: UpdateEmployeeInput): Promise<Employee> {
-      const current = await repository.findById(id)
-      if (!current) throw new NotFoundError('Employee')
-
-      // The schema checks the pair only when both are sent. Here one of them
-      // can come from the stored row.
-      const department = input.department ?? current.department
-      const jobTitle = input.jobTitle ?? current.jobTitle
-      if (!isJobTitleInDepartment(department, jobTitle)) {
-        throw new ValidationError([
-          { path: 'jobTitle', message: jobTitleNotInDepartmentMessage(jobTitle, department) },
-        ])
+      // The schema checks the pair when both are sent. With only one of them,
+      // the other half comes from the stored row, so only then is it read.
+      const sendsOnlyOneOfThePair =
+        (input.department === undefined) !== (input.jobTitle === undefined)
+      if (sendsOnlyOneOfThePair) {
+        const current = await repository.findById(id)
+        if (!current) throw new NotFoundError('Employee')
+        const department = input.department ?? current.department
+        const jobTitle = input.jobTitle ?? current.jobTitle
+        if (!isJobTitleInDepartment(department, jobTitle)) {
+          throw new ValidationError([
+            { path: 'jobTitle', message: jobTitleNotInDepartmentMessage(jobTitle, department) },
+          ])
+        }
       }
 
       const changes = input.country
         ? { ...input, currency: currencyForCountry(input.country) }
         : input
       const row = await repository.update(id, changes)
-      // deleted by someone else between the read and the write
       if (!row) throw new NotFoundError('Employee')
       return toEmployee(row)
     },
