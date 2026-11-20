@@ -14,7 +14,7 @@ export const SORT_FIELDS = ['fullName', 'annualSalary', 'hireDate'] as const
 export const SORT_ORDERS = ['asc', 'desc'] as const
 export const MAX_ANNUAL_SALARY = 100_000_000
 
-// UTC, so the API and the tests agree on what "today" is
+// UTC date, so the rule does not depend on the time zone of the server
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10)
 }
