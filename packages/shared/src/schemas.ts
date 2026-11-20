@@ -74,10 +74,15 @@ function checkJobTitleInDepartment(
   })
 }
 
-export const createEmployeeSchema = z.object(employeeFields).superRefine(checkJobTitleInDepartment)
+// Shown when the request body is missing or isn't a JSON object at all
+const notAnObject = { error: 'Send the employee as a JSON object' }
+
+export const createEmployeeSchema = z
+  .object(employeeFields, notAnObject)
+  .superRefine(checkJobTitleInDepartment)
 
 export const updateEmployeeSchema = z
-  .object(employeeFields)
+  .object(employeeFields, notAnObject)
   .partial()
   .refine(
     (value) => Object.values<unknown>(value).some((field) => field !== undefined),
@@ -108,6 +113,20 @@ export const employeeListQuerySchema = z
     message: 'Pick a country to sort by salary, since each country pays in its own currency',
   })
 
+const employeeIdMessage = 'Employee id must be a positive whole number'
+
+// The id column is a Postgres integer, so anything above this can't exist
+// and would make the query fail instead of returning "not found".
+export const MAX_EMPLOYEE_ID = 2_147_483_647
+
+export const employeeIdParamSchema = z.object({
+  id: z
+    .string({ error: employeeIdMessage })
+    .regex(/^\d+$/, employeeIdMessage)
+    .transform(Number)
+    .pipe(z.number().int().min(1, employeeIdMessage).max(MAX_EMPLOYEE_ID, employeeIdMessage)),
+})
+
 export const countryParamSchema = z.object({ country: countrySchema })
 
 export const underpaidQuerySchema = z.object({
@@ -133,10 +152,19 @@ export const employeeListResponseSchema = z.object({
   total: z.number().int(),
 })
 
+export const metaResponseSchema = z.object({
+  countries: z.array(
+    z.object({ code: countrySchema, name: z.string(), currency: z.enum(CURRENCIES) }),
+  ),
+  departments: z.array(z.object({ name: departmentSchema, jobTitles: z.array(jobTitleSchema) })),
+})
+
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>
 export type EmployeeListQuery = z.infer<typeof employeeListQuerySchema>
 export type CountryParam = z.infer<typeof countryParamSchema>
+export type EmployeeIdParam = z.infer<typeof employeeIdParamSchema>
+export type MetaResponse = z.infer<typeof metaResponseSchema>
 export type UnderpaidQuery = z.infer<typeof underpaidQuerySchema>
 export type Employee = z.infer<typeof employeeSchema>
 export type EmployeeListResponse = z.infer<typeof employeeListResponseSchema>

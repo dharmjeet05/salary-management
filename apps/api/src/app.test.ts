@@ -1,9 +1,21 @@
+import { createTestDb, type TestDb } from '@salary/db/testing'
+import type { Express } from 'express'
 import request from 'supertest'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { createApp } from './app'
 
 const webOrigin = 'http://localhost:3000'
-const app = createApp({ corsOrigin: webOrigin })
+let testDb: TestDb
+let app: Express
+
+beforeAll(async () => {
+  testDb = await createTestDb()
+  app = createApp({ corsOrigin: webOrigin, db: testDb.db })
+})
+
+afterAll(async () => {
+  await testDb.close()
+})
 
 afterEach(() => {
   vi.restoreAllMocks()
