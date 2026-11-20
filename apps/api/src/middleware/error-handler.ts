@@ -29,7 +29,13 @@ export const notFoundHandler: RequestHandler = (_req, res) => {
   sendError(res, 'NOT_FOUND', 'Route not found')
 }
 
-export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, _next) => {
+export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, next) => {
+  // A response that already started can't get a second one. Express's own
+  // handler closes the connection instead.
+  if (res.headersSent) {
+    next(error)
+    return
+  }
   if (error instanceof ZodError) {
     const details = error.issues.map((issue) => ({
       path: issue.path.join('.'),
