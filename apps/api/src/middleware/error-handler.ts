@@ -29,7 +29,7 @@ export const notFoundHandler: RequestHandler = (_req, res) => {
   sendError(res, 'NOT_FOUND', 'Route not found')
 }
 
-export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, next) => {
+export const errorHandler: ErrorRequestHandler = (error: unknown, req, res, next) => {
   // A response that already started can't get a second one. Express's own
   // handler closes the connection instead.
   if (res.headersSent) {
@@ -61,6 +61,6 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, nex
     sendError(res, error.code, error.message, error.details)
     return
   }
-  console.error(error)
+  console.error(req.method, req.originalUrl, error)
   sendError(res, 'INTERNAL_ERROR', 'Something went wrong')
 }
