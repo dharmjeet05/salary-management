@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
+import { EmployeesView } from '@/features/employees/components/employees-view'
 
 export const metadata: Metadata = { title: 'Employees | Salary Management' }
 
 export default function EmployeesPage() {
+  // useSearchParams needs a Suspense boundary to keep the page static
   return (
-    <section className="space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
-      <p className="text-muted-foreground">The employee list comes next.</p>
-    </section>
+    <Suspense>
+      <EmployeesView />
+    </Suspense>
   )
 }
