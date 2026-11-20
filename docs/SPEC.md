@@ -345,8 +345,11 @@ Every error has the same body:
 - Command: `pnpm db:seed`
 - Creates exactly 10,000 employees
 - Deterministic: a fixed seed for the random generator, so the same run gives the same data
-- Country mix, roughly: India 35%, United States 20%, United Kingdom 10%, Germany 10%, Canada 8%, Australia 7%, Singapore 5%, Brazil 5%
-- Salary = base band for the job title (in USD terms) × country factor, converted to local currency with a fixed table, with ±15% random spread. The fixed table is only used to make realistic seed numbers, never for insights
+- Country mix, exact: India 3,500, United States 2,000, United Kingdom 1,000, Germany 1,000, Canada 800, Australia 700, Singapore 500, Brazil 500
+- Names come from short lists per country, so people in India have Indian names and people in Brazil Brazilian ones. ASCII only
+- Departments are weighted (Engineering the biggest, People and Finance the smallest), and senior and manager titles are rarer than the rest
+- Salary = base band for the job title (in USD terms) × country factor, converted to local currency with a fixed table, with ±15% random spread, rounded to 1,000 local units. About 3% of people are paid 60 to 78% of their band instead, so the underpaid insight has real cases to show. The fixed table is only used to make realistic seed numbers, never for insights
+- Hire dates fall between 2010-01-01 and 2026-10-31, fixed dates so the data doesn't change with the day it runs
 - Unique emails: `first.last.<n>@acme.test`
 - Inserts in batches of 1,000 inside one transaction. Clears the table first, so running it twice is safe
 - Target: under 10 seconds on a laptop

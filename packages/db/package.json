@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx --env-file-if-exists=.env src/seed/run-seed.ts"
   },
   "dependencies": {
     "@salary/shared": "workspace:*",
@@ -26,6 +27,7 @@
     "@types/pg": "8.23.1",
     "drizzle-kit": "0.31.11",
     "eslint": "9.39.5",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "vitest": "5.1.1"
   }

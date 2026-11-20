@@ -13,7 +13,8 @@ pnpm install
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 cp packages/db/.env.example packages/db/.env
-pnpm --filter @salary/db db:migrate
+pnpm db:migrate
+pnpm db:seed
 pnpm dev
 ```
 
