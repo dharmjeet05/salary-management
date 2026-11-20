@@ -27,7 +27,8 @@ function firstIssue(result: {
 
 beforeEach(() => {
   vi.useFakeTimers()
-  vi.setSystemTime(new Date('2026-11-20T10:00:00Z'))
+  // 08:00 UTC: it is 20 Nov in India and not yet 21 Nov anywhere, even at UTC+14
+  vi.setSystemTime(new Date('2026-11-20T08:00:00Z'))
 })
 
 afterEach(() => {
@@ -123,14 +124,38 @@ describe('creating an employee', () => {
     })
   })
 
+  it("accepts today's date in India while UTC is still on the day before", () => {
+    vi.setSystemTime(new Date('2026-11-20T21:30:00Z'))
+    const result = createEmployeeSchema.safeParse({ ...validEmployee, hireDate: '2026-11-21' })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts a hire date on 1 January 1950', () => {
+    const result = createEmployeeSchema.safeParse({ ...validEmployee, hireDate: '1950-01-01' })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a hire date before 1950', () => {
+    const result = createEmployeeSchema.safeParse({ ...validEmployee, hireDate: '1949-12-31' })
+    expect(firstIssue(result)).toEqual({
+      path: 'hireDate',
+      message: 'Hire date cannot be before 1950',
+    })
+  })
+
   it('rejects a date that does not exist', () => {
     const result = createEmployeeSchema.safeParse({ ...validEmployee, hireDate: '2026-02-30' })
     expect(firstIssue(result)).toEqual({ path: 'hireDate', message: 'Enter a date as YYYY-MM-DD' })
   })
 
-  it('rejects a missing field', () => {
+  it('asks for a name when it is missing', () => {
+    const result = createEmployeeSchema.safeParse({ ...validEmployee, fullName: undefined })
+    expect(firstIssue(result)).toEqual({ path: 'fullName', message: 'Enter a name' })
+  })
+
+  it('asks for an email when it is missing', () => {
     const result = createEmployeeSchema.safeParse({ ...validEmployee, email: undefined })
-    expect(firstIssue(result).path).toBe('email')
+    expect(firstIssue(result)).toEqual({ path: 'email', message: 'Enter an email' })
   })
 })
 
@@ -141,6 +166,11 @@ describe('updating an employee', () => {
 
   it('rejects an update with no fields', () => {
     const result = updateEmployeeSchema.safeParse({})
+    expect(firstIssue(result).message).toBe('Send at least one field to change')
+  })
+
+  it('rejects an update where every field is undefined', () => {
+    const result = updateEmployeeSchema.safeParse({ email: undefined })
     expect(firstIssue(result).message).toBe('Send at least one field to change')
   })
 
