@@ -64,6 +64,13 @@ describe('adding an employee', () => {
   })
 })
 
+describe('the add page', () => {
+  it('offers a way back to the list without adding anyone', () => {
+    renderWithQuery(<NewEmployeeView />)
+    expect(screen.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/employees')
+  })
+})
+
 describe('changing an employee', () => {
   it('fills the form with the employee', async () => {
     vi.mocked(fetchEmployee).mockResolvedValue(asha)
