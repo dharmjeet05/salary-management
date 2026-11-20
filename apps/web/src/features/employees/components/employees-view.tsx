@@ -72,6 +72,17 @@ export function EmployeesView() {
             Try again
           </Button>
         </Message>
+      ) : list.data.data.length === 0 && list.data.total > 0 ? (
+        <Message title="This page is past the end of the list">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setParams({ page: 1 })
+            }}
+          >
+            Go to the first page
+          </Button>
+        </Message>
       ) : list.data.data.length === 0 ? (
         <Message title={hasFilters ? 'No employees match your filters' : 'No employees yet'}>
           {hasFilters ? (
