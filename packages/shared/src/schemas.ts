@@ -108,7 +108,14 @@ export const employeeListQuerySchema = z
     message: 'Pick a country to sort by salary, since each country pays in its own currency',
   })
 
-export const employeeIdParamSchema = z.object({ id: z.coerce.number().int().positive() })
+const employeeIdMessage = 'Employee id must be a positive whole number'
+
+export const employeeIdParamSchema = z.object({
+  id: z.coerce
+    .number({ error: employeeIdMessage })
+    .int(employeeIdMessage)
+    .positive(employeeIdMessage),
+})
 
 export const countryParamSchema = z.object({ country: countrySchema })
 
