@@ -8,18 +8,25 @@
     "build": "tsup src/server.ts --format esm --target node24 --clean",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
-    "express": "5.3.0"
+    "cors": "2.8.6",
+    "express": "5.3.0",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@salary/config": "workspace:*",
+    "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/node": "24.19.2",
+    "@types/supertest": "7.2.1",
     "eslint": "9.39.5",
+    "supertest": "7.3.2",
     "tsup": "9.0.0",
     "tsx": "4.23.15",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "5.1.1"
   }
 }
