@@ -144,6 +144,26 @@ describe('cost per department in a country', () => {
   })
 })
 
+describe('totals above 2,147,483,647', () => {
+  it('adds up a department total bigger than a 32 bit integer', async () => {
+    // 22 people at the 100,000,000 maximum make 2.2 billion, past the int range,
+    // which postgres returns as a bigint
+    const employees = createEmployeeRepository(testDb.db)
+    for (let n = 1; n <= 22; n++) {
+      await employees.insert(
+        employeeRow({
+          email: `big.${String(n)}@acme.test`,
+          country: 'DE',
+          currency: 'EUR',
+          annualSalary: 100_000_000,
+        }),
+      )
+    }
+    const [engineering] = await insights.departmentStats('DE')
+    expect(engineering?.totalSalary).toBe(2_200_000_000)
+  })
+})
+
 describe('underpaid people in a country', () => {
   it('finds people under 80% of the median for their job title', async () => {
     // software engineer median is 1.1m, 80% is 880k, so only the 700k one
