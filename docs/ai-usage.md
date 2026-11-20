@@ -1,6 +1,6 @@
 # How AI was used
 
-The whole project was built with an AI coding agent, on purpose. This page covers how the work was set up so the agent stayed correct, the prompts that steered it, and the places where it was wrong and how that was caught.
+The whole project was built with an AI coding agent, on purpose. This page covers how the work was set up so the agent stayed correct, and the places where it was wrong and how that was caught.
 
 ## Tools
 
@@ -33,24 +33,6 @@ Dharmjeet set the direction and made every product and design call. The agent pr
 5. **Check it for real.** Run it in a browser against the real API, or the Docker image behind Caddy. Typecheck passing doesn't show the screen works
 6. **A deep review on every PR**, with the findings posted as PR comments before any fix. 36 review comments over 17 PRs. The ones Dharmjeet picked were fixed in their own commits, then replied to and resolved
 7. **Merge with a merge commit**, so the history keeps every step
-
-## Prompts that steered it
-
-Real prompts from Dharmjeet, in order, some lightly trimmed. The full trail is in the issues, PRs and review threads.
-
-> let me first give you some instuction how i want to build it after that you can give me your thoughts. it should be all in typescript. will use nextjs, express, postgresql, drizzle orm, shadcn, tailwindcss. will do all in monorepo turborepo in pnpm. will do spec driven development. will create one spec document with everything one source of truth. from there we will create many tasks and work on them one by one by creating branches and will open pr and all that. folder structure should be clean in backend proper api layer, business logic service layer, db layer, for frontend also logic should be in hooks
-
-> before we fix anything write these comments on the pr please
-
-> for the form can you please use react hook form after that you can review it
-
-> instead of frontend deploy on vercel can't we do all in our vps. what do you think?
-
-> seeding is not good every name should be different please i can see same name multiple times
-
-> so many api's are calling in network tab please check test it properly add test cases if needed and fix it
-
-The standing instructions are in [CLAUDE.md](../CLAUDE.md). The skills add the task checklist, the PR description format and the review method on top.
 
 ## Where the AI was wrong, and how it was caught
 

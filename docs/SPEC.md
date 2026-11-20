@@ -177,7 +177,7 @@ packages/
   config/              shared tsconfig and eslint config
 docs/
   SPEC.md              this file
-  ai-usage.md          how AI tools were used, prompts, what was fixed by hand
+  ai-usage.md          how AI tools were used, what was fixed by hand
   tradeoffs.md         decisions and what was given up, performance
   deploy.md            steps for the VPS
 ```
@@ -392,7 +392,7 @@ CI runs lint, typecheck and tests on every PR.
 - Small commits with Conventional Commits messages (`test:`, `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`)
 - One PR per issue, PR says "Closes #n", CI must be green
 - Merge with a merge commit, not squash, so the commit history stays visible
-- AI tools are used for every task. Rules for the agent live in `CLAUDE.md`. Prompts and places where AI output was wrong and fixed by hand go in `docs/ai-usage.md`
+- AI tools are used for every task. Rules for the agent live in `CLAUDE.md`. How AI was used, and places where its output was wrong and fixed by hand, go in `docs/ai-usage.md`
 
 ---
 
