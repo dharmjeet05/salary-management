@@ -22,7 +22,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <QueryProvider>
           <header className="border-b">
             <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-6">
-              <Link href="/employees" className="text-sm font-semibold">
+              {/* No prefetch, same as the nav: it would refire on every url change */}
+              <Link href="/employees" prefetch={false} className="text-sm font-semibold">
                 ACME Salaries
               </Link>
               <MainNav />

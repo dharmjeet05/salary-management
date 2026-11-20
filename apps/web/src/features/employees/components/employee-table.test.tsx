@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { EmployeeTable } from './employee-table'
 
+vi.mock('next/link', () => import('@/test/link-mock'))
+
 const asha: Employee = {
   id: 1,
   fullName: 'Asha Patel',
@@ -96,5 +98,10 @@ describe('employee table', () => {
   it('opens the salary sort once a country is picked', () => {
     renderTable({ canSortBySalary: true })
     expect(screen.getByRole('button', { name: /Salary/ })).toBeEnabled()
+  })
+
+  it("does not prefetch each row's edit page", () => {
+    renderTable()
+    expect(screen.getByRole('link', { name: 'Asha Patel' })).toHaveAttribute('data-prefetch', 'off')
   })
 })

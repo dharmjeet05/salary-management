@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MainNav } from './main-nav'
 
+vi.mock('next/link', () => import('@/test/link-mock'))
+
 const navigation = vi.hoisted(() => ({ pathname: '/employees' }))
 
 vi.mock('next/navigation', () => ({
@@ -34,5 +36,10 @@ describe('main navigation', () => {
   it('does not mark the other section', () => {
     render(<MainNav />)
     expect(screen.getByRole('link', { name: 'Insights' })).not.toHaveAttribute('aria-current')
+  })
+
+  it('does not prefetch the sections', () => {
+    render(<MainNav />)
+    expect(screen.getByRole('link', { name: 'Insights' })).toHaveAttribute('data-prefetch', 'off')
   })
 })

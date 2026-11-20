@@ -29,8 +29,10 @@ export function UnderpaidTable({ underpaid, returnTo }: UnderpaidTableProps) {
         {underpaid.employees.map((row) => (
           <TableRow key={row.id}>
             <TableCell>
+              {/* No prefetch: a country can list dozens of people */}
               <Link
                 href={withReturnTo(`/employees/${String(row.id)}/edit`, returnTo)}
+                prefetch={false}
                 className="font-medium underline-offset-4 hover:underline"
               >
                 {row.fullName}

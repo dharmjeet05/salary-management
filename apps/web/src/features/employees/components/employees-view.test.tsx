@@ -8,6 +8,7 @@ import { fetchEmployees } from '../api/employees-api'
 import { EmployeesView } from './employees-view'
 
 vi.mock('../api/employees-api', () => ({ fetchEmployees: vi.fn() }))
+vi.mock('next/link', () => import('@/test/link-mock'))
 
 const router = vi.hoisted(() => ({ push: vi.fn(), search: '' }))
 
@@ -76,6 +77,15 @@ describe('employees page', () => {
     expect(screen.getByRole('link', { name: 'Add employee' })).toHaveAttribute(
       'href',
       '/employees/new?from=%2Femployees%3Fcountry%3DIN',
+    )
+  })
+
+  it('does not prefetch the add employee page', () => {
+    fetchEmployeesMock.mockReturnValue(new Promise(() => undefined))
+    renderView()
+    expect(screen.getByRole('link', { name: 'Add employee' })).toHaveAttribute(
+      'data-prefetch',
+      'off',
     )
   })
 
