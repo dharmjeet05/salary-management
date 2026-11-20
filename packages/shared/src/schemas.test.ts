@@ -17,7 +17,10 @@ const validEmployee = {
   hireDate: '2022-04-11',
 }
 
-function firstIssue(result: { success: boolean; error?: { issues: { path: PropertyKey[]; message: string }[] } }) {
+function firstIssue(result: {
+  success: boolean
+  error?: { issues: { path: PropertyKey[]; message: string }[] }
+}) {
   const issue = result.error?.issues[0]
   return { path: issue?.path.join('.'), message: issue?.message }
 }
@@ -126,8 +129,7 @@ describe('creating an employee', () => {
   })
 
   it('rejects a missing field', () => {
-    const { email: _email, ...withoutEmail } = validEmployee
-    const result = createEmployeeSchema.safeParse(withoutEmail)
+    const result = createEmployeeSchema.safeParse({ ...validEmployee, email: undefined })
     expect(firstIssue(result).path).toBe('email')
   })
 })
@@ -187,7 +189,7 @@ describe('listing employees', () => {
   })
 
   it('treats an empty search box as no search', () => {
-    expect(employeeListQuerySchema.parse({ search: '  ' })).not.toHaveProperty('search')
+    expect(employeeListQuerySchema.parse({ search: '  ' }).search).toBeUndefined()
   })
 
   it('rejects a one letter search', () => {
