@@ -299,12 +299,13 @@ Every error has the same body:
 }
 ```
 
-| Code             | Status | When                                            |
-| ---------------- | ------ | ----------------------------------------------- |
-| VALIDATION_ERROR | 400    | body or query fails the Zod schema              |
-| NOT_FOUND        | 404    | employee id does not exist                      |
-| EMAIL_TAKEN      | 409    | email already used by another employee          |
-| INTERNAL_ERROR   | 500    | anything unexpected, no stack trace in the body |
+| Code              | Status | When                                                                 |
+| ----------------- | ------ | -------------------------------------------------------------------- |
+| VALIDATION_ERROR  | 400    | body or query fails the Zod schema, or the body is not readable JSON |
+| NOT_FOUND         | 404    | employee id or route does not exist                                  |
+| EMAIL_TAKEN       | 409    | email already used by another employee                               |
+| PAYLOAD_TOO_LARGE | 413    | request body is over 100 kb                                          |
+| INTERNAL_ERROR    | 500    | anything unexpected, no stack trace in the body                      |
 
 ---
 
