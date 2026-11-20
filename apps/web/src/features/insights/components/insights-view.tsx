@@ -96,6 +96,9 @@ export function InsightsView() {
   const underpaid = useUnderpaid(country, params.threshold)
 
   const countryName = country ? countryNames.get(country) : undefined
+  // the overview leaves out countries with nobody in them
+  const isEmptyCountry =
+    overview.data !== undefined && !overview.data.countries.some((row) => row.country === country)
   const query = writeInsightsParams({ ...params, country })
   const returnTo = query ? `/insights?${query}` : '/insights'
 
@@ -128,49 +131,62 @@ export function InsightsView() {
             <h2 className="text-xl font-semibold tracking-tight">{countryName}</h2>
           </div>
 
-          <Section title="Cost by department" description="Total yearly salary per department.">
-            <QueryBlock query={departments} loadingLabel="Loading cost by department">
-              {(data) => <DepartmentTable insights={data} />}
-            </QueryBlock>
-          </Section>
+          {isEmptyCountry ? (
+            <p className="text-muted-foreground rounded-lg border border-dashed px-6 py-8 text-center">
+              Nobody works in {countryName} yet
+            </p>
+          ) : (
+            <>
+              <Section title="Cost by department" description="Total yearly salary per department.">
+                <QueryBlock query={departments} loadingLabel="Loading cost by department">
+                  {(data) => <DepartmentTable insights={data} />}
+                </QueryBlock>
+              </Section>
 
-          <Section title="Pay by job title">
-            <QueryBlock query={jobTitles} loadingLabel="Loading pay by job title">
-              {(data) => <JobTitleTable insights={data} />}
-            </QueryBlock>
-          </Section>
+              <Section title="Pay by job title">
+                <QueryBlock query={jobTitles} loadingLabel="Loading pay by job title">
+                  {(data) => <JobTitleTable insights={data} />}
+                </QueryBlock>
+              </Section>
 
-          <Section
-            title="Paid well below their peers"
-            description={`People paid under ${percent(params.threshold)} of the median for their job title in ${countryName}.`}
-            action={
-              <NativeSelect
-                aria-label="How far below the median"
-                value={String(params.threshold)}
-                onChange={(event) => {
-                  const threshold = THRESHOLDS.find((value) => String(value) === event.target.value)
-                  if (threshold !== undefined) setParams({ threshold })
-                }}
+              <Section
+                title="Paid well below their peers"
+                description={`People paid under ${percent(params.threshold)} of the median for their job title in ${countryName}.`}
+                action={
+                  <NativeSelect
+                    aria-label="How far below the median"
+                    value={String(params.threshold)}
+                    onChange={(event) => {
+                      const threshold = THRESHOLDS.find(
+                        (value) => String(value) === event.target.value,
+                      )
+                      if (threshold !== undefined) setParams({ threshold })
+                    }}
+                  >
+                    {THRESHOLDS.map((value) => (
+                      <NativeSelectOption key={value} value={String(value)}>
+                        Under {percent(value)} of the median
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                }
               >
-                {THRESHOLDS.map((value) => (
-                  <NativeSelectOption key={value} value={String(value)}>
-                    Under {percent(value)} of the median
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            }
-          >
-            {underpaid.data?.employees.length === 0 ? (
-              <p className="text-muted-foreground rounded-lg border border-dashed px-6 py-8 text-center">
-                Nobody in {countryName} is under {percent(params.threshold)} of the median for their
-                job title
-              </p>
-            ) : (
-              <QueryBlock query={underpaid} loadingLabel="Loading people paid below their peers">
-                {(data) => <UnderpaidTable underpaid={data} returnTo={returnTo} />}
-              </QueryBlock>
-            )}
-          </Section>
+                {underpaid.data?.employees.length === 0 ? (
+                  <p className="text-muted-foreground rounded-lg border border-dashed px-6 py-8 text-center">
+                    Nobody in {countryName} is under {percent(params.threshold)} of the median for
+                    their job title
+                  </p>
+                ) : (
+                  <QueryBlock
+                    query={underpaid}
+                    loadingLabel="Loading people paid below their peers"
+                  >
+                    {(data) => <UnderpaidTable underpaid={data} returnTo={returnTo} />}
+                  </QueryBlock>
+                )}
+              </Section>
+            </>
+          )}
         </>
       ) : null}
     </div>
