@@ -149,6 +149,11 @@ describe('creating an employee', () => {
     expect(firstIssue(result)).toEqual({ path: 'hireDate', message: 'Enter a date as YYYY-MM-DD' })
   })
 
+  it('asks for a JSON object when the body is not one', () => {
+    const result = createEmployeeSchema.safeParse(undefined)
+    expect(firstIssue(result)).toEqual({ path: '', message: 'Send the employee as a JSON object' })
+  })
+
   it('asks for a name when it is missing', () => {
     const result = createEmployeeSchema.safeParse({ ...validEmployee, fullName: undefined })
     expect(firstIssue(result)).toEqual({ path: 'fullName', message: 'Enter a name' })
@@ -163,6 +168,11 @@ describe('creating an employee', () => {
 describe('updating an employee', () => {
   it('accepts a change to one field', () => {
     expect(updateEmployeeSchema.parse({ annualSalary: 2000000 })).toEqual({ annualSalary: 2000000 })
+  })
+
+  it('asks for a JSON object when the update body is not one', () => {
+    const result = updateEmployeeSchema.safeParse(undefined)
+    expect(firstIssue(result).message).toBe('Send the employee as a JSON object')
   })
 
   it('rejects an update with no fields', () => {
@@ -306,5 +316,21 @@ describe('employee id in the url', () => {
 
   it('rejects id 0', () => {
     expect(employeeIdParamSchema.safeParse({ id: '0' }).success).toBe(false)
+  })
+
+  it('accepts the largest id postgres can store', () => {
+    expect(employeeIdParamSchema.parse({ id: '2147483647' })).toEqual({ id: 2147483647 })
+  })
+
+  it('rejects an id above what postgres can store', () => {
+    expect(employeeIdParamSchema.safeParse({ id: '2147483648' }).success).toBe(false)
+  })
+
+  it('rejects a hex id', () => {
+    expect(employeeIdParamSchema.safeParse({ id: '0x10' }).success).toBe(false)
+  })
+
+  it('rejects an id written as a power of ten', () => {
+    expect(employeeIdParamSchema.safeParse({ id: '1e3' }).success).toBe(false)
   })
 })

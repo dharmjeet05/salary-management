@@ -71,6 +71,14 @@ describe('POST /api/employees', () => {
     })
   })
 
+  it('answers 400 with a plain message when the body is not JSON', async () => {
+    const response = await request(app).post('/api/employees').type('form').send('fullName=Asha')
+    expect(response.status).toBe(400)
+    expect(response.body).toMatchObject({
+      error: { details: [{ path: '', message: 'Send the employee as a JSON object' }] },
+    })
+  })
+
   it('answers 409 when the email is already used', async () => {
     await addEmployee()
     const response = await request(app)
@@ -87,6 +95,11 @@ describe('GET /api/employees/:id', () => {
     const response = await request(app).get(`/api/employees/${String(id)}`)
     expect(response.status).toBe(200)
     expect(response.body).toMatchObject({ id, email: 'asha.patel@acme.test' })
+  })
+
+  it('answers 400, not a crash, for an id too large for the database', async () => {
+    const response = await request(app).get('/api/employees/2147483648')
+    expect(response.status).toBe(400)
   })
 
   it('answers 404 for an id that does not exist', async () => {
