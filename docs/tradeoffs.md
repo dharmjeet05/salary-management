@@ -23,7 +23,7 @@ Got: views that survive a reload, can be bookmarked and shared, and back and for
 ## Architecture
 
 **Express API plus Next.js, not Next.js alone.**
-Gave up: one deployable and shared server code.
+Gave up: one app, and reading the database straight from server components.
 Got: a backend with clear layers (routes, controllers, services, repositories) that can be tested on its own with Supertest, and a frontend that only renders and fetches.
 
 **One Zod schema per rule, shared by the API and the form.**
