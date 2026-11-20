@@ -46,6 +46,12 @@ describe('generating seed employees', () => {
     expect(new Set(employees.map((employee) => employee.fullName)).size).toBe(10_000)
   })
 
+  it('stops when a country has more people than different names', () => {
+    expect(() => generateEmployees({ count: 20_000, seed: 42 })).toThrow(
+      'Not enough different names for IN',
+    )
+  })
+
   it('gives everyone a different email', () => {
     expect(new Set(employees.map((employee) => employee.email)).size).toBe(10_000)
   })
