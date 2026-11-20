@@ -91,6 +91,25 @@ describe('employees page', () => {
     expect(router.push).toHaveBeenCalledWith('/employees', { scroll: false })
   })
 
+  it('says when a page is past the end and offers the first page', async () => {
+    router.search = 'page=999'
+    fetchEmployeesMock.mockResolvedValue({ ...onePage, data: [], page: 999, total: 10000 })
+    renderView()
+    expect(await screen.findByText('This page is past the end of the list')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Go to the first page' }))
+    expect(router.push).toHaveBeenCalledWith('/employees', { scroll: false })
+  })
+
+  it('keeps the sort and rows per page when filters are cleared', async () => {
+    router.search = 'search=zzz&pageSize=50&sortBy=hireDate'
+    fetchEmployeesMock.mockResolvedValue({ ...onePage, data: [], pageSize: 50, total: 0 })
+    renderView()
+    await userEvent.click(await screen.findByRole('button', { name: 'Clear filters' }))
+    expect(router.push).toHaveBeenCalledWith('/employees?pageSize=50&sortBy=hireDate', {
+      scroll: false,
+    })
+  })
+
   it('shows the error with a way to try again', async () => {
     fetchEmployeesMock.mockRejectedValueOnce(
       new ApiError(

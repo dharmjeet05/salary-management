@@ -72,6 +72,11 @@ describe('employee table', () => {
     expect(screen.getByRole('button', { name: /Salary/ })).toBeDisabled()
   })
 
+  it('shows why the salary sort is locked on something that still gets hover', () => {
+    renderTable({ canSortBySalary: false })
+    expect(screen.getByTitle('Pick a country to sort by salary')).not.toHaveAttribute('disabled')
+  })
+
   it('opens the salary sort once a country is picked', () => {
     renderTable({ canSortBySalary: true })
     expect(screen.getByRole('button', { name: /Salary/ })).toBeEnabled()
