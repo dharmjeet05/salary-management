@@ -1,7 +1,6 @@
-export type ErrorCode =
-  'VALIDATION_ERROR' | 'NOT_FOUND' | 'EMAIL_TAKEN' | 'PAYLOAD_TOO_LARGE' | 'INTERNAL_ERROR'
+import type { ErrorCode, ErrorDetail } from '@salary/shared'
 
-export type ErrorDetail = { path: string; message: string }
+export type { ErrorCode, ErrorDetail }
 
 // Errors a service throws on purpose. They carry a code for the client and
 // know nothing about HTTP, the error middleware picks the status.

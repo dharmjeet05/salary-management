@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  apiErrorSchema,
   countryParamSchema,
   employeeIdParamSchema,
   createEmployeeSchema,
@@ -332,5 +333,29 @@ describe('employee id in the url', () => {
 
   it('rejects an id written as a power of ten', () => {
     expect(employeeIdParamSchema.safeParse({ id: '1e3' }).success).toBe(false)
+  })
+})
+
+describe('api error body', () => {
+  it('reads an error with details', () => {
+    const body = {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid request',
+        details: [{ path: 'email', message: 'Enter a valid email' }],
+      },
+    }
+    expect(apiErrorSchema.parse(body)).toEqual(body)
+  })
+
+  it('reads an error without details', () => {
+    const body = { error: { code: 'NOT_FOUND', message: 'Employee not found' } }
+    expect(apiErrorSchema.parse(body)).toEqual(body)
+  })
+
+  it('rejects a code the api never sends', () => {
+    expect(apiErrorSchema.safeParse({ error: { code: 'TEAPOT', message: 'x' } }).success).toBe(
+      false,
+    )
   })
 })

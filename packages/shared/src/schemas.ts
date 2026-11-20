@@ -210,6 +210,22 @@ export const underpaidResponseSchema = z.object({
   ),
 })
 
+export const ERROR_CODES = [
+  'VALIDATION_ERROR',
+  'NOT_FOUND',
+  'EMAIL_TAKEN',
+  'PAYLOAD_TOO_LARGE',
+  'INTERNAL_ERROR',
+] as const
+
+export const apiErrorSchema = z.object({
+  error: z.object({
+    code: z.enum(ERROR_CODES),
+    message: z.string(),
+    details: z.array(z.object({ path: z.string(), message: z.string() })).optional(),
+  }),
+})
+
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>
 export type EmployeeListQuery = z.infer<typeof employeeListQuerySchema>
@@ -220,6 +236,9 @@ export type CountryInsightsResponse = z.infer<typeof countryInsightsResponseSche
 export type JobTitleInsightsResponse = z.infer<typeof jobTitleInsightsResponseSchema>
 export type DepartmentInsightsResponse = z.infer<typeof departmentInsightsResponseSchema>
 export type UnderpaidResponse = z.infer<typeof underpaidResponseSchema>
+export type ApiErrorBody = z.infer<typeof apiErrorSchema>
+export type ErrorCode = (typeof ERROR_CODES)[number]
+export type ErrorDetail = NonNullable<ApiErrorBody['error']['details']>[number]
 export type UnderpaidQuery = z.infer<typeof underpaidQuerySchema>
 export type Employee = z.infer<typeof employeeSchema>
 export type EmployeeListResponse = z.infer<typeof employeeListResponseSchema>
