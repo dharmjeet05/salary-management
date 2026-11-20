@@ -42,6 +42,7 @@ const asha: Employee = {
 function renderWithQuery(ui: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
+  return client
 }
 
 beforeEach(() => {
@@ -114,6 +115,27 @@ describe('changing an employee', () => {
     renderWithQuery(<EditEmployeeView id="abc" />)
     expect(await screen.findByText('Employee not found')).toBeInTheDocument()
     expect(fetchEmployee).not.toHaveBeenCalled()
+  })
+})
+
+describe('keeping insights up to date', () => {
+  it('refreshes insights after a salary change, so a fixed salary leaves the underpaid list', async () => {
+    vi.mocked(fetchEmployee).mockResolvedValue(asha)
+    vi.mocked(updateEmployee).mockResolvedValue(asha)
+    const client = renderWithQuery(<EditEmployeeView id="1" />)
+    const invalidate = vi.spyOn(client, 'invalidateQueries')
+    await userEvent.click(await screen.findByRole('button', { name: 'Save changes' }))
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['insights'] })
+  })
+
+  it('refreshes insights after a delete', async () => {
+    vi.mocked(fetchEmployee).mockResolvedValue(asha)
+    vi.mocked(deleteEmployee).mockResolvedValue()
+    const client = renderWithQuery(<EditEmployeeView id="1" />)
+    const invalidate = vi.spyOn(client, 'invalidateQueries')
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete Asha Patel' }))
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['insights'] })
   })
 })
 

@@ -18,8 +18,12 @@ describe('going back to the list', () => {
     expect(listReturnPath('//evil.example/employees')).toBe('/employees')
   })
 
-  it('only goes back to the employee list, not another page', () => {
-    expect(listReturnPath('/insights')).toBe('/employees')
+  it('goes back to the insights view it came from', () => {
+    expect(listReturnPath('/insights?country=IN')).toBe('/insights?country=IN')
+  })
+
+  it('only goes back to the employee list or insights, not another page', () => {
+    expect(listReturnPath('/employees/new')).toBe('/employees')
   })
 })
 

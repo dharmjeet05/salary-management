@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
+import { InsightsView } from '@/features/insights/components/insights-view'
 
 export const metadata: Metadata = { title: 'Insights | Salary Management' }
 
 export default function InsightsPage() {
+  // useSearchParams needs a Suspense boundary to keep the page static
   return (
-    <section className="space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight">Insights</h1>
-      <p className="text-muted-foreground">Pay by country, job title and department comes next.</p>
-    </section>
+    <Suspense>
+      <InsightsView />
+    </Suspense>
   )
 }
