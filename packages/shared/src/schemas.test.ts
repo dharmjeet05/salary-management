@@ -296,8 +296,12 @@ describe('employee id in the url', () => {
     expect(employeeIdParamSchema.parse({ id: '42' })).toEqual({ id: 42 })
   })
 
-  it('rejects an id that is not a number', () => {
-    expect(employeeIdParamSchema.safeParse({ id: 'abc' }).success).toBe(false)
+  it('rejects an id that is not a number with a plain message', () => {
+    const result = employeeIdParamSchema.safeParse({ id: 'abc' })
+    expect(firstIssue(result)).toEqual({
+      path: 'id',
+      message: 'Employee id must be a positive whole number',
+    })
   })
 
   it('rejects id 0', () => {
