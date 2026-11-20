@@ -39,7 +39,7 @@ One persona: the HR manager. They are not technical. They want to find a person 
    - One command creates 10,000 realistic employees
    - Same input gives the same data every time
 5. Deployed
-   - Web app on Vercel, API and database on a VPS, plus a short video demo
+   - Web app, API and database on a VPS under `https://dharmjeet.com/salary-management`, plus a short video demo
 
 ### Deliberately left out
 
@@ -142,7 +142,7 @@ All TypeScript.
 | Validation | Zod, shared by API and web                                    |
 | Tests      | Vitest, Supertest, PGlite (Postgres in process)               |
 | CI         | GitHub Actions                                                |
-| Hosting    | Vercel (web), own VPS (API + PostgreSQL)                      |
+| Hosting    | own VPS (web, API, PostgreSQL) behind Caddy                   |
 
 ### Repo layout
 
@@ -397,35 +397,49 @@ CI runs lint, typecheck and tests on every PR.
 
 ## Part 10. Deployment
 
-| Part            | Where  | How                                                                                    |
-| --------------- | ------ | -------------------------------------------------------------------------------------- |
-| Web             | Vercel | connected to the GitHub repo, root `apps/web`, env `NEXT_PUBLIC_API_URL`               |
-| API             | VPS    | a Docker image built from the root `Dockerfile`, container `salary-management`         |
-| Database        | VPS    | PostgreSQL 18 in Docker, container `salary-management-db`, a named volume, no ports    |
-| HTTPS + routing | VPS    | the Caddy container that already serves `dharmjeet.com`, on the docker network `proxy` |
+Everything runs on the VPS, on one origin:
 
-The VPS follows the private infra repo (`dharmjeet05/infra`): Caddy is the only container that publishes ports, apps join the external `proxy` network and Caddy reaches them by container name. The compose file and `.env` for this app live there, in `apps/salary-management/`, not in this repo.
+- web app: `https://dharmjeet.com/salary-management`
+- API: `https://dharmjeet.com/salary-management/api/...`
 
-- Public API URL: `https://dharmjeet.com/salary-management`, so a list call is `https://dharmjeet.com/salary-management/api/employees`
-- Caddy sends `/salary-management/*` to the API container and strips the prefix (`handle_path`), so Express keeps plain routes like `/api/employees` and `/health`. Everything else on `dharmjeet.com` stays with the portfolio
+The browser calls the API on the same origin, so CORS never comes into play.
+
+| Part            | How                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------- |
+| Image           | one image from the root `Dockerfile`, with the API bundle and the Next.js standalone server |
+| API             | container `salary-management`, from that image                                              |
+| Web             | container `salary-management-web`, the same image with another command                      |
+| Database        | PostgreSQL 18 in Docker, container `salary-management-db`, a named volume, no ports         |
+| HTTPS + routing | the Caddy container that already serves `dharmjeet.com`, on the docker network `proxy`      |
+
+The VPS follows the private infra repo (`dharmjeet05/infra`): Caddy is the only container that publishes ports, apps join the external `proxy` network and Caddy reaches them by container name. The compose file and `.env` for this app live there, in `apps/salary-management/`, not in this repo. One image keeps the infra `deploy.sh` as it is, since it builds one image per app.
+
+- Caddy routes by path. Everything else on `dharmjeet.com` stays with the portfolio
   ```
   dharmjeet.com {
     encode zstd gzip
-    handle_path /salary-management/* {
+    handle /salary-management/api/* {
+      uri strip_prefix /salary-management
       reverse_proxy salary-management:4000
+    }
+    handle /salary-management /salary-management/* {
+      reverse_proxy salary-management-web:3000
     }
     handle {
       reverse_proxy dharmjeet-web:3000
     }
   }
   ```
-- The API publishes no ports. Only Caddy reaches it, over `proxy`. The database sits on its own internal network that only the API joins
-- API env: `DATABASE_URL`, `PORT`, `CORS_ORIGIN` (the Vercel URL), `BUILD_TAG` (the commit, sent back as the `X-Build` header)
-- The image runs pending migrations, then starts the API. A `HEALTHCHECK` calls `/health`, and the infra `deploy.sh` waits for it
+- The API keeps plain routes like `/api/employees`. `/health` is not under `/api`, so only the healthcheck inside the container reaches it
+- Next.js runs with `basePath: '/salary-management'`, locally too (`http://localhost:3000/salary-management`), so links behave the same in dev and on the server
+- `NEXT_PUBLIC_API_URL` is put into the web code at build time. The `Dockerfile` takes it as a build arg, defaulting to `https://dharmjeet.com/salary-management`
+- Nothing publishes ports. The web container joins `proxy` only. The database sits on its own internal network that only the API joins
+- API env: `DATABASE_URL`, `PORT`, `CORS_ORIGIN` (`https://dharmjeet.com`), `BUILD_TAG` (the commit, sent back as the `X-Build` header)
+- The API container runs pending migrations, then starts the API. A `HEALTHCHECK` calls `/health`, and the infra `deploy.sh` waits for it. The web container has its own healthcheck in compose
 - The API stops cleanly on `SIGTERM`: it finishes open requests and closes the database pool
 - Seed runs once by hand on the server: `docker exec salary-management node dist/seed.js`. It replaces all employees with the seeded 10,000
-- Deploy: `/opt/vps/infra/scripts/deploy.sh salary-management` on the VPS. It pulls, builds the image tagged with the commit, backs up the database and starts it. CD is out of scope
-- Steps for the VPS and Vercel: `docs/deploy.md`
+- Deploy: `/opt/vps/infra/scripts/deploy.sh salary-management` on the VPS. It pulls, builds the image tagged with the commit, backs up the database and starts both containers. CD is out of scope
+- Steps: `docs/deploy.md`
 - The demo video shows the deployed app, not localhost
 
 ---
@@ -448,8 +462,10 @@ Each line becomes one GitHub issue, done in this order.
 12. Web: employees list page with URL state
 13. Web: create and edit form, delete with confirm
 14. Web: insights page
-15. Deploy: Dockerfile, compose and Caddy route in the infra repo, Vercel project
+15. Deploy: Dockerfile, compose and Caddy route in the infra repo
 16. Docs: README with live links and demo video, architecture diagram, `ai-usage.md`, `tradeoffs.md`
+
+Added later: #31, the web app on the VPS too, on one origin, in place of Vercel.
 
 ---
 
