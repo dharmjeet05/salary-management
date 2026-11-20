@@ -20,7 +20,7 @@ pnpm dev
 
 Set `DATABASE_URL` in `apps/api/.env` and `packages/db/.env` to your database.
 
-API on http://localhost:4000, web app on http://localhost:3000.
+API on http://localhost:4000, web app on http://localhost:3000/salary-management.
 
 ## Deploy
 
