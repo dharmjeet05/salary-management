@@ -13,7 +13,7 @@ type CountrySeed = {
 export const COUNTRY_SEED: Record<CountryCode, CountrySeed> = {
   IN: {
     share: 0.35,
-    costFactor: 0.3,
+    costFactor: 0.2,
     usdRate: 83,
     firstNames: [
       'Aarav',
