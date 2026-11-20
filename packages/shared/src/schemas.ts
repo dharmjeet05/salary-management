@@ -108,6 +108,8 @@ export const employeeListQuerySchema = z
     message: 'Pick a country to sort by salary, since each country pays in its own currency',
   })
 
+export const employeeIdParamSchema = z.object({ id: z.coerce.number().int().positive() })
+
 export const countryParamSchema = z.object({ country: countrySchema })
 
 export const underpaidQuerySchema = z.object({
@@ -133,10 +135,19 @@ export const employeeListResponseSchema = z.object({
   total: z.number().int(),
 })
 
+export const metaResponseSchema = z.object({
+  countries: z.array(
+    z.object({ code: countrySchema, name: z.string(), currency: z.enum(CURRENCIES) }),
+  ),
+  departments: z.array(z.object({ name: departmentSchema, jobTitles: z.array(jobTitleSchema) })),
+})
+
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>
 export type EmployeeListQuery = z.infer<typeof employeeListQuerySchema>
 export type CountryParam = z.infer<typeof countryParamSchema>
+export type EmployeeIdParam = z.infer<typeof employeeIdParamSchema>
+export type MetaResponse = z.infer<typeof metaResponseSchema>
 export type UnderpaidQuery = z.infer<typeof underpaidQuerySchema>
 export type Employee = z.infer<typeof employeeSchema>
 export type EmployeeListResponse = z.infer<typeof employeeListResponseSchema>
