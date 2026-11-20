@@ -1,4 +1,5 @@
-export type ErrorCode = 'VALIDATION_ERROR' | 'NOT_FOUND' | 'EMAIL_TAKEN' | 'INTERNAL_ERROR'
+export type ErrorCode =
+  'VALIDATION_ERROR' | 'NOT_FOUND' | 'EMAIL_TAKEN' | 'PAYLOAD_TOO_LARGE' | 'INTERNAL_ERROR'
 
 export type ErrorDetail = { path: string; message: string }
 

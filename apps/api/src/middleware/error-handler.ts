@@ -6,6 +6,7 @@ const statusByCode: Record<ErrorCode, number> = {
   VALIDATION_ERROR: 400,
   NOT_FOUND: 404,
   EMAIL_TAKEN: 409,
+  PAYLOAD_TOO_LARGE: 413,
   INTERNAL_ERROR: 500,
 }
 
@@ -15,9 +16,13 @@ function sendError(res: Response, code: ErrorCode, message: string, details?: Er
     .json({ error: details ? { code, message, details } : { code, message } })
 }
 
-// body-parser marks a broken JSON body with this type
-function isBadJson(error: unknown) {
-  return error instanceof SyntaxError && 'type' in error && error.type === 'entity.parse.failed'
+// body-parser tags the errors it throws with a `type` and marks the ones caused
+// by the client with `expose`, for example a broken, too large or unreadable body
+function bodyParserClientErrorType(error: unknown) {
+  if (typeof error !== 'object' || error === null) return undefined
+  if (!('type' in error) || typeof error.type !== 'string') return undefined
+  if (!('expose' in error) || error.expose !== true) return undefined
+  return error.type
 }
 
 export const notFoundHandler: RequestHandler = (_req, res) => {
@@ -33,8 +38,17 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, _ne
     sendError(res, 'VALIDATION_ERROR', 'Invalid request', details)
     return
   }
-  if (isBadJson(error)) {
+  const bodyErrorType = bodyParserClientErrorType(error)
+  if (bodyErrorType === 'entity.parse.failed') {
     sendError(res, 'VALIDATION_ERROR', 'Request body is not valid JSON')
+    return
+  }
+  if (bodyErrorType === 'entity.too.large') {
+    sendError(res, 'PAYLOAD_TOO_LARGE', 'Request body is too large')
+    return
+  }
+  if (bodyErrorType !== undefined) {
+    sendError(res, 'VALIDATION_ERROR', 'Request body could not be read')
     return
   }
   if (error instanceof DomainError) {
