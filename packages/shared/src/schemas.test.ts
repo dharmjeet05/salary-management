@@ -160,6 +160,16 @@ describe('creating an employee', () => {
     expect(firstIssue(result)).toEqual({ path: 'fullName', message: 'Enter a name' })
   })
 
+  it('asks for a salary when it is missing', () => {
+    const result = createEmployeeSchema.safeParse({ ...validEmployee, annualSalary: undefined })
+    expect(firstIssue(result)).toEqual({ path: 'annualSalary', message: 'Enter a salary' })
+  })
+
+  it('asks for a hire date when it is missing', () => {
+    const result = createEmployeeSchema.safeParse({ ...validEmployee, hireDate: undefined })
+    expect(firstIssue(result)).toEqual({ path: 'hireDate', message: 'Enter a hire date' })
+  })
+
   it('asks for an email when it is missing', () => {
     const result = createEmployeeSchema.safeParse({ ...validEmployee, email: undefined })
     expect(firstIssue(result)).toEqual({ path: 'email', message: 'Enter an email' })
