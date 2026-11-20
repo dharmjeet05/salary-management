@@ -197,4 +197,26 @@ describe('underpaid people in a country', () => {
   it('returns nothing for a country with nobody in it', async () => {
     expect(await insights.underpaid('US', 0.8)).toEqual([])
   })
+
+  it('works for salaries near the 100,000,000 maximum', async () => {
+    // 30m x 100 is past the 32 bit integer range, so the share has to be
+    // worked out without integer maths
+    const employees = createEmployeeRepository(testDb.db)
+    for (const [n, annualSalary] of [30_000_000, 90_000_000, 100_000_000].entries()) {
+      await employees.insert(
+        employeeRow({
+          email: `lead.${String(n)}@acme.test`,
+          jobTitle: 'Engineering Manager',
+          annualSalary,
+        }),
+      )
+    }
+    const rows = await insights.underpaid('IN', 0.8)
+    // median 90m, 80% is 72m, 30 / 90 = 33%
+    expect(rows.find((row) => row.jobTitle === 'Engineering Manager')).toMatchObject({
+      annualSalary: 30_000_000,
+      medianSalary: 90_000_000,
+      percentOfMedian: 33,
+    })
+  })
 })
