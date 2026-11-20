@@ -46,6 +46,11 @@ describe('employees table', () => {
     await expect(duplicate).rejects.toMatchObject({ cause: { code: '23505' } })
   })
 
+  it('refuses an email with capital letters', async () => {
+    const mixedCase = testDb.db.insert(employees).values({ ...asha, email: 'Asha.Patel@acme.test' })
+    await expect(mixedCase).rejects.toMatchObject({ cause: { code: '23514' } })
+  })
+
   it('refuses a salary of 0', async () => {
     const zeroSalary = testDb.db.insert(employees).values({ ...asha, annualSalary: 0 })
     await expect(zeroSalary).rejects.toMatchObject({ cause: { code: '23514' } })
