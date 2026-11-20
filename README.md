@@ -33,10 +33,10 @@ Each task was a GitHub issue, built on its own branch, test first, reviewed on i
 
 ```mermaid
 flowchart LR
-  Browser -->|https| Caddy
+  Browser -->|"https"| Caddy
   subgraph VPS["VPS, docker"]
-    Caddy -->|/salary-management/*| Web["Next.js<br/>salary-management-web"]
-    Caddy -->|/salary-management/api/*| API["Express API<br/>salary-management"]
+    Caddy -->|"/salary-management/*"| Web["Next.js<br/>salary-management-web"]
+    Caddy -->|"/salary-management/api/*"| API["Express API<br/>salary-management"]
     API --> DB[("PostgreSQL 18")]
   end
 ```
