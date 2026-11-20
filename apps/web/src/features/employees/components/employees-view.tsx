@@ -1,12 +1,15 @@
 'use client'
 
+import { Plus } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ApiError } from '@/lib/api-client'
 import { useEmployeeListParams } from '../hooks/use-employee-list-params'
 import { useEmployees } from '../hooks/use-employees'
 import { useSearchInput } from '../hooks/use-search-input'
-import { sortChange } from '../list-params'
+import { sortChange, writeListParams } from '../list-params'
+import { withReturnTo } from '../return-to'
 import { EmployeeFilters } from './employee-filters'
 import { EmployeePagination } from './employee-pagination'
 import { EmployeeTable } from './employee-table'
@@ -40,17 +43,27 @@ export function EmployeesView() {
   const search = useSearchInput(params.search, (value) => {
     setParams({ search: value })
   })
+  const listQuery = writeListParams(params)
+  const returnTo = listQuery ? `/employees?${listQuery}` : '/employees'
   const hasFilters = Boolean(
     params.search ?? params.country ?? params.department ?? params.jobTitle,
   )
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
-        <p className="text-muted-foreground h-5 text-sm">
-          {list.data ? countLabel(list.data.total) : null}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
+          <p className="text-muted-foreground h-5 text-sm">
+            {list.data ? countLabel(list.data.total) : null}
+          </p>
+        </div>
+        <Button asChild>
+          <Link href={withReturnTo('/employees/new', returnTo)}>
+            <Plus aria-hidden />
+            Add employee
+          </Link>
+        </Button>
       </div>
 
       <EmployeeFilters
@@ -104,6 +117,7 @@ export function EmployeesView() {
               sortBy={params.sortBy}
               sortOrder={params.sortOrder}
               canSortBySalary={params.country !== undefined}
+              returnTo={returnTo}
               onSort={(field) => {
                 setParams(sortChange(params, field))
               }}

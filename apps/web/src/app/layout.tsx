@@ -3,6 +3,7 @@ import { Geist } from 'next/font/google'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { MainNav } from '@/components/main-nav'
+import { Toaster } from '@/components/ui/sonner'
 import { QueryProvider } from '@/lib/query-provider'
 import { cn } from '@/lib/utils'
 import './globals.css'
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
           <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+          <Toaster position="bottom-right" />
         </QueryProvider>
       </body>
     </html>
