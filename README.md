@@ -4,6 +4,7 @@ A web app for ACME's HR manager to manage salary data for 10,000 employees acros
 
 - Live: https://dharmjeet.com/salary-management
 - API: https://dharmjeet.com/salary-management/api/meta
+- Demo video (19 min): https://drive.google.com/file/d/1st6v6ymHpUVIJbr_4XoH0FIH4yvU6Rvn/view
 
 ## What the HR manager can do
 
