@@ -72,6 +72,16 @@ describe('error handler', () => {
     })
   })
 
+  it('logs which request failed with an unexpected error', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const error = new Error('disk full')
+    const app = appThatThrows(() => {
+      throw error
+    })
+    await request(app).get('/boom')
+    expect(log).toHaveBeenCalledWith('GET', '/boom', error)
+  })
+
   it('logs an unexpected error once', async () => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     const app = appThatThrows(() => {

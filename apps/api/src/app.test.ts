@@ -1,9 +1,13 @@
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from './app'
 
 const webOrigin = 'http://localhost:3000'
 const app = createApp({ corsOrigin: webOrigin })
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
 describe('api app', () => {
   it('answers the health check', async () => {
@@ -26,6 +30,37 @@ describe('api app', () => {
     expect(response.status).toBe(400)
     expect(response.body).toEqual({
       error: { code: 'VALIDATION_ERROR', message: 'Request body is not valid JSON' },
+    })
+  })
+
+  it('answers a body over 100 kb with 413', async () => {
+    const response = await request(app)
+      .post('/health')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ note: 'x'.repeat(200_000) }))
+    expect(response.status).toBe(413)
+    expect(response.body).toEqual({
+      error: { code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' },
+    })
+  })
+
+  it('does not log a body that is too large as a crash', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    await request(app)
+      .post('/health')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ note: 'x'.repeat(200_000) }))
+    expect(log).not.toHaveBeenCalled()
+  })
+
+  it('answers a body in a charset it cannot read with 400', async () => {
+    const response = await request(app)
+      .post('/health')
+      .set('Content-Type', 'application/json; charset=klingon')
+      .send('{}')
+    expect(response.status).toBe(400)
+    expect(response.body).toEqual({
+      error: { code: 'VALIDATION_ERROR', message: 'Request body could not be read' },
     })
   })
 

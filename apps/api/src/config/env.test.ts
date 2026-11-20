@@ -24,6 +24,16 @@ describe('environment', () => {
     expect(() => loadEnv({ PORT: valid.PORT })).toThrow(/CORS_ORIGIN/)
   })
 
+  it('drops a trailing slash from CORS_ORIGIN, since browsers send the origin without one', () => {
+    expect(loadEnv({ CORS_ORIGIN: 'https://salary.vercel.app/' }).corsOrigin).toBe(
+      'https://salary.vercel.app',
+    )
+  })
+
+  it('stops when CORS_ORIGIN is not http or https', () => {
+    expect(() => loadEnv({ CORS_ORIGIN: 'javascript:alert(1)' })).toThrow(/CORS_ORIGIN/)
+  })
+
   it('stops when CORS_ORIGIN is not a url', () => {
     expect(() => loadEnv({ ...valid, CORS_ORIGIN: 'localhost' })).toThrow(/CORS_ORIGIN/)
   })
