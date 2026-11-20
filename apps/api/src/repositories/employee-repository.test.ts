@@ -1,5 +1,5 @@
 import { createTestDb, resetDb, type TestDb } from '@salary/db/testing'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmailTakenError } from '../errors/domain-errors'
 import { employeeRow } from '../test/fixtures'
 import { createEmployeeRepository, type EmployeeRepository } from './employee-repository'
@@ -18,6 +18,10 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await resetDb(testDb.db)
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 describe('employee repository', () => {
@@ -48,10 +52,13 @@ describe('employee repository', () => {
     expect(updated).toMatchObject({ annualSalary: 2000000, fullName: 'Asha Patel' })
   })
 
-  it('moves updatedAt forward on update', async () => {
-    const created = await repository.insert(employeeRow())
-    const updated = await repository.update(created.id, { annualSalary: 2000000 })
-    expect(updated?.updatedAt.getTime()).toBeGreaterThanOrEqual(created.updatedAt.getTime())
+  it('sets updatedAt to the time of the update', async () => {
+    const { id } = await repository.insert(employeeRow())
+    const later = new Date('2030-01-01T00:00:00Z')
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(later)
+    const updated = await repository.update(id, { annualSalary: 2000000 })
+    expect(updated?.updatedAt).toEqual(later)
   })
 
   it('returns null when updating an id that does not exist', async () => {
