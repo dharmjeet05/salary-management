@@ -1,0 +1,32 @@
+{
+  "name": "@salary/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@salary/shared": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.17",
+    "@salary/config": "workspace:*",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.11",
+    "eslint": "9.39.5",
+    "typescript": "6.0.3",
+    "vitest": "5.1.1"
+  }
+}

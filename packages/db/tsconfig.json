@@ -1,0 +1,4 @@
+{
+  "extends": "@salary/config/tsconfig/node.json",
+  "include": ["src", "drizzle.config.ts"]
+}
