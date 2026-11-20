@@ -20,7 +20,7 @@ Dharmjeet set the direction and made every product and design call. The agent pr
 - spec driven: one spec as the single source of truth, and every task a public GitHub issue
 - review comments go on the PR first, then Dharmjeet picks which ones to fix
 - salary sort only inside one country, since salaries are in different currencies
-- react-hook-form with `Controller` for the form fields
+- `Controller` fields for the form
 - everything on the VPS on one origin, instead of the web app on Vercel
 - two bugs found on the live site: names that repeated, and too many requests in the network tab
 
@@ -36,7 +36,7 @@ Dharmjeet set the direction and made every product and design call. The agent pr
 
 ## Prompts that steered it
 
-Real prompts from Dharmjeet, in order, the first one lightly trimmed. The full trail is in the issues, PRs and review threads.
+Real prompts from Dharmjeet, in order, some lightly trimmed. The full trail is in the issues, PRs and review threads.
 
 > let me first give you some instuction how i want to build it after that you can give me your thoughts. it should be all in typescript. will use nextjs, express, postgresql, drizzle orm, shadcn, tailwindcss. will do all in monorepo turborepo in pnpm. will do spec driven development. will create one spec document with everything one source of truth. from there we will create many tasks and work on them one by one by creating branches and will open pr and all that. folder structure should be clean in backend proper api layer, business logic service layer, db layer, for frontend also logic should be in hooks
 
@@ -87,7 +87,6 @@ Most mistakes were caught by the process, not by luck: the review on each PR, ru
 
 - **Repeated names** (#33): each country had 16 × 16 name pairs, so India's 3,500 people shared about 256 names. The seed tests checked emails were unique, not names. Now a test checks 10,000 different full names
 - **Request flood** (#34): one search fired about 49 requests. They weren't API calls but Next.js prefetching every row's edit page, again on every URL change. Measured before and after in a production build: 49 down to 2
-- **Form library** (#28): the first form used plain inputs. Dharmjeet asked for react-hook-form, then for `Controller` fields. The tests didn't change, which showed they test behaviour, not the implementation
 
 ## What worked
 
