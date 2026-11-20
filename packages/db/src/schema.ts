@@ -21,6 +21,7 @@ export const employees = pgTable(
       .$onUpdate(() => new Date()),
   },
   (table) => [
+    check('employees_email_lower_case', sql`${table.email} = lower(${table.email})`),
     check('employees_annual_salary_positive', sql`${table.annualSalary} > 0`),
     index('employees_country_job_title_idx').on(table.country, table.jobTitle),
     index('employees_country_department_idx').on(table.country, table.department),

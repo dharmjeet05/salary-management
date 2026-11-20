@@ -8,6 +8,13 @@
       "when": 1795157396034,
       "tag": "0000_create_employees",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795158286831,
+      "tag": "0001_email_lower_case",
+      "breakpoints": true
     }
   ]
 }
