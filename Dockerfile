@@ -16,9 +16,13 @@ COPY apps/api/package.json apps/api/
 COPY packages/config/package.json packages/config/
 COPY packages/db/package.json packages/db/
 COPY packages/shared/package.json packages/shared/
-RUN pnpm install --frozen-lockfile --filter @salary/api...
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
+    --mount=type=cache,id=pnpm-cache,target=/root/.cache/pnpm \
+    pnpm install --frozen-lockfile --store-dir /pnpm-store --filter @salary/api...
 COPY . .
-RUN pnpm --filter @salary/api build
+# tsup directly: `pnpm run` would first re-check the install against the
+# default store and try to reinstall
+RUN cd apps/api && node_modules/.bin/tsup
 
 # Only the packages the bundle imports at runtime: no tsx, no typescript
 FROM base AS runtime
@@ -28,7 +32,11 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/
 COPY packages/db/package.json packages/db/
 COPY packages/shared/package.json packages/shared/
-RUN pnpm install --frozen-lockfile --prod --filter @salary/api...
+# The package store and pnpm's metadata cache sit in build caches, not in
+# the image (about 300MB), and they make the next build's install fast
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
+    --mount=type=cache,id=pnpm-cache,target=/root/.cache/pnpm \
+    pnpm install --frozen-lockfile --prod --store-dir /pnpm-store --filter @salary/api...
 COPY --from=build /app/apps/api/dist apps/api/dist
 
 ARG BUILD_TAG=dev
