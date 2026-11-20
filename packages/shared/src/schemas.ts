@@ -44,12 +44,17 @@ const employeeFields = {
   department: departmentSchema,
   jobTitle: jobTitleSchema,
   annualSalary: z
-    .number({ error: 'Salary must be a number' })
+    .number({
+      error: (issue) => (issue.input === undefined ? 'Enter a salary' : 'Salary must be a number'),
+    })
     .int('Salary must be a whole number')
     .min(1, 'Salary must be more than 0')
     .max(MAX_ANNUAL_SALARY, 'Salary must be at most 100,000,000'),
   hireDate: z.iso
-    .date({ error: 'Enter a date as YYYY-MM-DD' })
+    .date({
+      error: (issue) =>
+        issue.input === undefined ? 'Enter a hire date' : 'Enter a date as YYYY-MM-DD',
+    })
     .refine((date) => date >= EARLIEST_HIRE_DATE, 'Hire date cannot be before 1950')
     .refine((date) => date <= latestAllowedHireDate(), 'Hire date cannot be in the future'),
 }
