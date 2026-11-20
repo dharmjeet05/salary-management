@@ -110,11 +110,16 @@ export const employeeListQuerySchema = z
 
 const employeeIdMessage = 'Employee id must be a positive whole number'
 
+// The id column is a Postgres integer, so anything above this can't exist
+// and would make the query fail instead of returning "not found".
+export const MAX_EMPLOYEE_ID = 2_147_483_647
+
 export const employeeIdParamSchema = z.object({
-  id: z.coerce
-    .number({ error: employeeIdMessage })
-    .int(employeeIdMessage)
-    .positive(employeeIdMessage),
+  id: z
+    .string({ error: employeeIdMessage })
+    .regex(/^\d+$/, employeeIdMessage)
+    .transform(Number)
+    .pipe(z.number().int().min(1, employeeIdMessage).max(MAX_EMPLOYEE_ID, employeeIdMessage)),
 })
 
 export const countryParamSchema = z.object({ country: countrySchema })
