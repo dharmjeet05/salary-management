@@ -74,10 +74,15 @@ function checkJobTitleInDepartment(
   })
 }
 
-export const createEmployeeSchema = z.object(employeeFields).superRefine(checkJobTitleInDepartment)
+// Shown when the request body is missing or isn't a JSON object at all
+const notAnObject = { error: 'Send the employee as a JSON object' }
+
+export const createEmployeeSchema = z
+  .object(employeeFields, notAnObject)
+  .superRefine(checkJobTitleInDepartment)
 
 export const updateEmployeeSchema = z
-  .object(employeeFields)
+  .object(employeeFields, notAnObject)
   .partial()
   .refine(
     (value) => Object.values<unknown>(value).some((field) => field !== undefined),
