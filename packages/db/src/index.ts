@@ -1,3 +1,5 @@
 export { createDb } from './client'
 export type { Database } from './database'
+export { migrateDatabase } from './migrate'
 export * from './schema'
+export { DEMO_EMPLOYEE_COUNT, seedDemoDatabase } from './seed/seed-demo'

@@ -13,14 +13,19 @@ import { metaRouter } from './routes/meta'
 import { createEmployeeService } from './services/employee-service'
 import { createInsightsService } from './services/insights-service'
 
-export type AppOptions = { corsOrigin: string; db: Database }
+export type AppOptions = { corsOrigin: string; db: Database; buildTag?: string }
 
-export function createApp({ corsOrigin, db }: AppOptions) {
+export function createApp({ corsOrigin, db, buildTag = 'dev' }: AppOptions) {
   const employees = createEmployeeController(createEmployeeService(createEmployeeRepository(db)))
   const insights = createInsightsController(createInsightsService(createInsightsRepository(db)))
 
   const app = express()
   app.disable('x-powered-by')
+  // the commit this runs, so `curl -I` after a deploy shows which build answers
+  app.use((_req, res, next) => {
+    res.setHeader('X-Build', buildTag)
+    next()
+  })
   // A list, so the header only shows up for the allowed origin
   app.use(cors({ origin: [corsOrigin] }))
   app.use(express.json())

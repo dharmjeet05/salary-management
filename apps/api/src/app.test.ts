@@ -86,6 +86,12 @@ describe('api app', () => {
     expect(response.headers['access-control-allow-origin']).toBeUndefined()
   })
 
+  it('sends the build it runs as X-Build, so a deploy can be checked', async () => {
+    const built = createApp({ corsOrigin: webOrigin, db: testDb.db, buildTag: 'a1b2c3d' })
+    const response = await request(built).get('/health')
+    expect(response.headers['x-build']).toBe('a1b2c3d')
+  })
+
   it('does not tell clients it runs on Express', async () => {
     const response = await request(app).get('/health')
     expect(response.headers['x-powered-by']).toBeUndefined()

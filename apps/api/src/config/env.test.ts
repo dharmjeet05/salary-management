@@ -52,4 +52,12 @@ describe('environment', () => {
       /DATABASE_URL/,
     )
   })
+
+  it('reads the build tag', () => {
+    expect(loadEnv({ ...valid, BUILD_TAG: 'a1b2c3d' }).buildTag).toBe('a1b2c3d')
+  })
+
+  it('calls the build dev when BUILD_TAG is not set', () => {
+    expect(loadEnv(valid).buildTag).toBe('dev')
+  })
 })

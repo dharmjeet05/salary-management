@@ -12,3 +12,14 @@ export function startServer(handler: RequestListener, port: number): Promise<Ser
     })
   })
 }
+
+// Stops taking new connections and resolves once the requests already
+// running have been answered.
+export function stopServer(server: Server): Promise<void> {
+  return new Promise((resolve, reject) => {
+    server.close((error) => {
+      if (error) reject(error)
+      else resolve()
+    })
+  })
+}
