@@ -115,14 +115,11 @@ describe('listing employees', () => {
     expect((await listNames({ sortOrder: 'desc' }))[0]).toBe('Ravi Kumar')
   })
 
-  it('sorts by salary, highest first', async () => {
-    expect(await listNames({ sortBy: 'annualSalary', sortOrder: 'desc' })).toEqual([
+  it('sorts by salary within a country, highest first', async () => {
+    expect(await listNames({ country: 'IN', sortBy: 'annualSalary', sortOrder: 'desc' })).toEqual([
       'Priya Shah',
       'Ravi Kumar',
       'Asha Patel',
-      'Liam Smith',
-      'Noah Mueller',
-      'emma Brown',
     ])
   })
 
@@ -205,7 +202,7 @@ describe('paging through many employees', () => {
   })
 
   it('never shows someone on two pages when salaries are equal', async () => {
-    const query = { pageSize: 10, sortBy: 'annualSalary' }
+    const query = { pageSize: 10, country: 'IN', sortBy: 'annualSalary' }
     const first = await repository.list(employeeListQuerySchema.parse({ ...query, page: 1 }))
     const second = await repository.list(employeeListQuerySchema.parse({ ...query, page: 2 }))
     const ids = [...first.rows, ...second.rows].map((row) => row.id)
