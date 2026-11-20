@@ -202,26 +202,26 @@ flowchart LR
 
 ### Table `employees`
 
-| Column        | Type                               | Notes                |
-| ------------- | ---------------------------------- | -------------------- |
-| id            | serial primary key                 |                      |
-| full_name     | varchar(100) not null              |                      |
-| email         | varchar(255) not null unique       | lower case           |
-| country       | char(2) not null                   | ISO code             |
-| currency      | char(3) not null                   | derived from country |
-| department    | varchar(50) not null               |                      |
-| job_title     | varchar(80) not null               |                      |
-| annual_salary | integer not null                   | check > 0            |
-| hire_date     | date not null                      |                      |
-| created_at    | timestamptz not null default now() |                      |
-| updated_at    | timestamptz not null default now() |                      |
+| Column        | Type                                             | Notes                |
+| ------------- | ------------------------------------------------ | -------------------- |
+| id            | integer generated always as identity primary key |                      |
+| full_name     | varchar(100) not null                            |                      |
+| email         | varchar(255) not null unique                     | lower case           |
+| country       | char(2) not null                                 | ISO code             |
+| currency      | char(3) not null                                 | derived from country |
+| department    | varchar(50) not null                             |                      |
+| job_title     | varchar(80) not null                             |                      |
+| annual_salary | integer not null                                 | check > 0            |
+| hire_date     | date not null                                    |                      |
+| created_at    | timestamptz not null default now()               |                      |
+| updated_at    | timestamptz not null default now()               |                      |
 
 ### Indexes
 
 - `(country, job_title)` for insights and filters
 - `(country, department)` for insights and filters
 - `(department)`, `(job_title)` for filters without a country
-- `lower(full_name) text_pattern_ops` for name prefix search
+- No index for search. Search is a case insensitive "contains" match on name or email, which a btree index can't serve. A scan of 10,000 rows takes a few milliseconds. At a million rows, add a `pg_trgm` GIN index
 - Email is already indexed by the unique constraint
 
 Migrations are generated with drizzle-kit and committed.
