@@ -56,9 +56,12 @@ async function readJson(response: Response): Promise<unknown> {
 }
 
 async function request(path: string, { method = 'GET', body, query }: RequestOptions = {}) {
+  // Outside the try below, so a missing api url shows as itself and not as
+  // a network problem
+  const url = apiUrl(path, query)
   let response: Response
   try {
-    response = await fetch(apiUrl(path, query), {
+    response = await fetch(url, {
       method,
       ...(body === undefined
         ? {}
