@@ -115,6 +115,16 @@ These lists live in `packages/shared` as constants. The API, the seed and the we
 - Underpaid: salary below 80% of the median for the same job title in the same country. The threshold is a query param with default 0.8
 - Every money value is returned with its currency. Values in different currencies are never added together
 
+### Insight responses
+
+Every response names the currency once, next to the numbers it applies to.
+
+- `GET /api/insights/countries`: `{ countries: [{ country, currency, headcount, minSalary, maxSalary, averageSalary, medianSalary }] }`, biggest headcount first
+- `GET /api/insights/countries/:country/job-titles`: `{ country, currency, jobTitles: [{ department, jobTitle, headcount, minSalary, maxSalary, averageSalary, medianSalary }] }`, by department, then job title
+- `GET /api/insights/countries/:country/departments`: `{ country, currency, departments: [{ department, headcount, totalSalary }] }`, biggest total first
+- `GET /api/insights/countries/:country/underpaid`: `{ country, currency, threshold, employees: [{ id, fullName, department, jobTitle, annualSalary, medianSalary, percentOfMedian }] }`, lowest `percentOfMedian` first, then id. `percentOfMedian` is a whole number, 64 means 64% of the median
+- A country with nobody in it gives empty lists, not a 404, since the country itself is valid
+
 ---
 
 ## Part 3. Architecture
