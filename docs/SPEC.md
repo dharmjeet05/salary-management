@@ -74,7 +74,7 @@ One persona: the HR manager. They are not technical. They want to find a person 
 | department           | enum      | one of the departments                                          |
 | jobTitle             | enum      | one of the job titles, and must belong to the chosen department |
 | annualSalary         | integer   | whole units of the local currency, 1 to 100,000,000             |
-| hireDate             | date      | required, not in the future                                     |
+| hireDate             | date      | required, from 1950-01-01 up to today in any time zone          |
 | createdAt, updatedAt | timestamp | set by the server                                               |
 
 ### Countries and currencies
