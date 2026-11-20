@@ -13,6 +13,7 @@ export const PAGE_SIZES = [10, 25, 50, 100] as const
 export const SORT_FIELDS = ['fullName', 'annualSalary', 'hireDate'] as const
 export const SORT_ORDERS = ['asc', 'desc'] as const
 export const MAX_ANNUAL_SALARY = 100_000_000
+export const EARLIEST_HIRE_DATE = '1950-01-01'
 
 // The date in the furthest ahead time zone (UTC+14). Anything up to it is
 // today somewhere, so an HR manager in India is never told today is in the future.
@@ -49,6 +50,7 @@ const employeeFields = {
     .max(MAX_ANNUAL_SALARY, 'Salary must be at most 100,000,000'),
   hireDate: z.iso
     .date({ error: 'Enter a date as YYYY-MM-DD' })
+    .refine((date) => date >= EARLIEST_HIRE_DATE, 'Hire date cannot be before 1950')
     .refine((date) => date <= latestAllowedHireDate(), 'Hire date cannot be in the future'),
 }
 
