@@ -19,9 +19,11 @@ export function useEmployeeListParams() {
     [params, pathname, router],
   )
 
+  // Only the filters. The sort and rows per page are how the person likes to
+  // read the list, not what they were looking for.
   const clearFilters = useCallback(() => {
-    router.push(pathname, { scroll: false })
-  }, [pathname, router])
+    setParams({ search: undefined, country: undefined, department: undefined, jobTitle: undefined })
+  }, [setParams])
 
   return { params, setParams, clearFilters }
 }
