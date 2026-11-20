@@ -159,12 +159,67 @@ export const metaResponseSchema = z.object({
   departments: z.array(z.object({ name: departmentSchema, jobTitles: z.array(jobTitleSchema) })),
 })
 
+const salaryStats = {
+  headcount: z.number().int(),
+  minSalary: z.number().int(),
+  maxSalary: z.number().int(),
+  averageSalary: z.number().int(),
+  medianSalary: z.number().int(),
+}
+
+export const countryInsightsResponseSchema = z.object({
+  countries: z.array(
+    z.object({ country: countrySchema, currency: z.enum(CURRENCIES), ...salaryStats }),
+  ),
+})
+
+export const jobTitleInsightsResponseSchema = z.object({
+  country: countrySchema,
+  currency: z.enum(CURRENCIES),
+  jobTitles: z.array(
+    z.object({ department: departmentSchema, jobTitle: jobTitleSchema, ...salaryStats }),
+  ),
+})
+
+export const departmentInsightsResponseSchema = z.object({
+  country: countrySchema,
+  currency: z.enum(CURRENCIES),
+  departments: z.array(
+    z.object({
+      department: departmentSchema,
+      headcount: z.number().int(),
+      totalSalary: z.number().int(),
+    }),
+  ),
+})
+
+export const underpaidResponseSchema = z.object({
+  country: countrySchema,
+  currency: z.enum(CURRENCIES),
+  threshold: z.number(),
+  employees: z.array(
+    z.object({
+      id: z.number().int(),
+      fullName: z.string(),
+      department: departmentSchema,
+      jobTitle: jobTitleSchema,
+      annualSalary: z.number().int(),
+      medianSalary: z.number().int(),
+      percentOfMedian: z.number().int(),
+    }),
+  ),
+})
+
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>
 export type EmployeeListQuery = z.infer<typeof employeeListQuerySchema>
 export type CountryParam = z.infer<typeof countryParamSchema>
 export type EmployeeIdParam = z.infer<typeof employeeIdParamSchema>
 export type MetaResponse = z.infer<typeof metaResponseSchema>
+export type CountryInsightsResponse = z.infer<typeof countryInsightsResponseSchema>
+export type JobTitleInsightsResponse = z.infer<typeof jobTitleInsightsResponseSchema>
+export type DepartmentInsightsResponse = z.infer<typeof departmentInsightsResponseSchema>
+export type UnderpaidResponse = z.infer<typeof underpaidResponseSchema>
 export type UnderpaidQuery = z.infer<typeof underpaidQuerySchema>
 export type Employee = z.infer<typeof employeeSchema>
 export type EmployeeListResponse = z.infer<typeof employeeListResponseSchema>
