@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1
 
-# The api image. The infra repo's deploy.sh builds it on the VPS:
+# One image with the api and the web app. The infra repo's deploy.sh builds it
+# on the VPS and compose runs it twice, once per command:
 #   docker build --build-arg BUILD_TAG=<commit> -t salary-management:<commit> .
-# The web app is not in it, it runs on Vercel.
+#   api: the default CMD          web: node /web/apps/web/server.js
 
 FROM node:24-alpine AS base
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
@@ -13,18 +14,25 @@ WORKDIR /app
 FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
 COPY packages/config/package.json packages/config/
 COPY packages/db/package.json packages/db/
 COPY packages/shared/package.json packages/shared/
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
     --mount=type=cache,id=pnpm-cache,target=/root/.cache/pnpm \
-    pnpm install --frozen-lockfile --store-dir /pnpm-store --filter @salary/api...
+    pnpm install --frozen-lockfile --store-dir /pnpm-store --filter @salary/api... --filter @salary/web...
 COPY . .
-# tsup directly: `pnpm run` would first re-check the install against the
-# default store and try to reinstall
+# The tools directly: `pnpm run` would first re-check the install against
+# the default store and try to reinstall
 RUN cd apps/api && node_modules/.bin/tsup
+# Put into the browser code at build time, so it is a build arg, not runtime env
+ARG NEXT_PUBLIC_API_URL=https://dharmjeet.com/salary-management
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_TELEMETRY_DISABLED=1
+RUN cd apps/web && node_modules/.bin/next build
 
-# Only the packages the bundle imports at runtime: no tsx, no typescript
+# Only what runs: the api's runtime packages, no tsx, no typescript, and the
+# web app's standalone server with the files it traced
 FROM base AS runtime
 ENV NODE_ENV=production \
     PORT=4000
@@ -38,6 +46,9 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
     --mount=type=cache,id=pnpm-cache,target=/root/.cache/pnpm \
     pnpm install --frozen-lockfile --prod --store-dir /pnpm-store --filter @salary/api...
 COPY --from=build /app/apps/api/dist apps/api/dist
+# owned by node, since Next writes its cache next to the server
+COPY --from=build --chown=node:node /app/apps/web/.next/standalone /web
+COPY --from=build --chown=node:node /app/apps/web/.next/static /web/apps/web/.next/static
 
 ARG BUILD_TAG=dev
 ENV BUILD_TAG=$BUILD_TAG
