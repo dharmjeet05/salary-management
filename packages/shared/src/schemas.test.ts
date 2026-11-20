@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   countryParamSchema,
+  employeeIdParamSchema,
   createEmployeeSchema,
   employeeListQuerySchema,
   underpaidQuerySchema,
@@ -287,5 +288,19 @@ describe('insight params', () => {
 
   it('rejects a threshold above 1', () => {
     expect(underpaidQuerySchema.safeParse({ threshold: '1.2' }).success).toBe(false)
+  })
+})
+
+describe('employee id in the url', () => {
+  it('reads the id as a number', () => {
+    expect(employeeIdParamSchema.parse({ id: '42' })).toEqual({ id: 42 })
+  })
+
+  it('rejects an id that is not a number', () => {
+    expect(employeeIdParamSchema.safeParse({ id: 'abc' }).success).toBe(false)
+  })
+
+  it('rejects id 0', () => {
+    expect(employeeIdParamSchema.safeParse({ id: '0' }).success).toBe(false)
   })
 })
