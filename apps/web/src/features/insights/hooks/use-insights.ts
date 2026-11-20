@@ -1,7 +1,7 @@
 'use client'
 
 import type { CountryCode } from '@salary/shared'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   fetchCountryInsights,
   fetchDepartmentInsights,
@@ -25,7 +25,6 @@ export function useJobTitleInsights(country: CountryCode | undefined) {
     queryKey: ['insights', 'job-titles', country],
     queryFn: () => fetchJobTitleInsights(requireCountry(country)),
     enabled: country !== undefined,
-    placeholderData: keepPreviousData,
   })
 }
 
@@ -34,7 +33,6 @@ export function useDepartmentInsights(country: CountryCode | undefined) {
     queryKey: ['insights', 'departments', country],
     queryFn: () => fetchDepartmentInsights(requireCountry(country)),
     enabled: country !== undefined,
-    placeholderData: keepPreviousData,
   })
 }
 
@@ -43,6 +41,9 @@ export function useUnderpaid(country: CountryCode | undefined, threshold: number
     queryKey: ['insights', 'underpaid', country, threshold],
     queryFn: () => fetchUnderpaid(requireCountry(country), threshold),
     enabled: country !== undefined,
-    placeholderData: keepPreviousData,
+    // the list stays while a new threshold loads, but never while another
+    // country loads, so one country's people never sit under the next
+    // country's name
+    placeholderData: (previous) => (previous?.country === country ? previous : undefined),
   })
 }
