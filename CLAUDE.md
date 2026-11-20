@@ -17,7 +17,7 @@ Rules for AI agents working in this repo. Humans follow them too.
 
 ## Commands
 
-- `pnpm dev` starts the API on 4000 and the web app on 3000
+- `pnpm dev` starts the API on 4000 and the web app on 3000 (at `/salary-management`)
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm format`
 - Run all of them before opening a PR. CI runs the same.
 
