@@ -47,19 +47,21 @@ function SortHeader({
       aria-sort={isSorted ? (sortOrder === 'asc' ? 'ascending' : 'descending') : undefined}
       className={align === 'right' ? 'text-right' : undefined}
     >
-      <Button
-        variant="ghost"
-        size="sm"
-        className="-mx-2.5"
-        disabled={disabledReason !== undefined}
-        title={disabledReason}
-        onClick={() => {
-          onSort(field)
-        }}
-      >
-        {label}
-        <Icon aria-hidden className={isSorted ? undefined : 'text-muted-foreground'} />
-      </Button>
+      {/* A disabled button gets no hover, so the reason sits on a wrapper */}
+      <span title={disabledReason} className="inline-flex">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-mx-2.5"
+          disabled={disabledReason !== undefined}
+          onClick={() => {
+            onSort(field)
+          }}
+        >
+          {label}
+          <Icon aria-hidden className={isSorted ? undefined : 'text-muted-foreground'} />
+        </Button>
+      </span>
     </TableHead>
   )
 }
