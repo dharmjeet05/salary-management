@@ -124,6 +124,19 @@ describe('api client', () => {
     })
   })
 
+  it('says the api url is missing instead of blaming the connection', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', undefined)
+    await expect(apiFetch('/api/employees/1', employeeSchema)).rejects.toThrow(
+      'NEXT_PUBLIC_API_URL must be set to the api url',
+    )
+  })
+
+  it('does not call the network when the api url is missing', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', undefined)
+    await apiFetch('/api/employees/1', employeeSchema).catch(() => undefined)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('resolves a delete that answers 204', async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
     await expect(apiDelete('/api/employees/1')).resolves.toBeUndefined()
