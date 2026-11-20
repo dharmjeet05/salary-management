@@ -24,7 +24,7 @@ API on http://localhost:4000, web app on http://localhost:3000/salary-management
 
 ## Deploy
 
-The web app runs on Vercel, the API and PostgreSQL on a VPS behind Caddy. Steps: [docs/deploy.md](docs/deploy.md).
+The web app, the API and PostgreSQL run on a VPS behind Caddy, at https://dharmjeet.com/salary-management. Steps: [docs/deploy.md](docs/deploy.md).
 
 ## Checks
 

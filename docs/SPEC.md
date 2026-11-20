@@ -422,7 +422,8 @@ The VPS follows the private infra repo (`dharmjeet05/infra`): Caddy is the only 
       uri strip_prefix /salary-management
       reverse_proxy salary-management:4000
     }
-    handle /salary-management /salary-management/* {
+    @salary-web path /salary-management /salary-management/*
+    handle @salary-web {
       reverse_proxy salary-management-web:3000
     }
     handle {
