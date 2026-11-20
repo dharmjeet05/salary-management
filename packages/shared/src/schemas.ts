@@ -71,7 +71,10 @@ export const createEmployeeSchema = z.object(employeeFields).superRefine(checkJo
 export const updateEmployeeSchema = z
   .object(employeeFields)
   .partial()
-  .refine((value) => Object.keys(value).length > 0, 'Send at least one field to change')
+  .refine(
+    (value) => Object.values(value).some((field) => field !== undefined),
+    'Send at least one field to change',
+  )
   .superRefine(checkJobTitleInDepartment)
 
 export const employeeListQuerySchema = z.object({
