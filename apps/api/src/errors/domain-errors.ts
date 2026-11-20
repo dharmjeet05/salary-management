@@ -29,3 +29,11 @@ export class EmailTakenError extends DomainError {
     super('EMAIL_TAKEN', emailTakenMessage, [{ path: 'email', message: emailTakenMessage }])
   }
 }
+
+// A rule only the service can check, like a job title against the stored
+// department. Same code and body shape as a schema error.
+export class ValidationError extends DomainError {
+  constructor(details: ErrorDetail[]) {
+    super('VALIDATION_ERROR', 'Invalid request', details)
+  }
+}

@@ -54,6 +54,12 @@ const employeeFields = {
     .refine((date) => date <= latestAllowedHireDate(), 'Hire date cannot be in the future'),
 }
 
+// Shared with the API, which runs the same check against the stored
+// department when an update sends only one of the two
+export function jobTitleNotInDepartmentMessage(jobTitle: JobTitle, department: Department) {
+  return `${jobTitle} is not a job title in ${department}`
+}
+
 function checkJobTitleInDepartment(
   value: { department?: Department; jobTitle?: JobTitle },
   ctx: z.RefinementCtx,
@@ -64,7 +70,7 @@ function checkJobTitleInDepartment(
   ctx.addIssue({
     code: 'custom',
     path: ['jobTitle'],
-    message: `${jobTitle} is not a job title in ${department}`,
+    message: jobTitleNotInDepartmentMessage(jobTitle, department),
   })
 }
 

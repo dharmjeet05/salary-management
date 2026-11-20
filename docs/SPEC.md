@@ -194,7 +194,7 @@ flowchart LR
 - Controllers never contain business rules or SQL
 - Controllers parse params, query and body with the shared Zod schemas. A parse error goes to the error middleware and becomes a 400. There is no separate validation middleware, because Express 5 makes `req.query` read only and a middleware would lose the parsed type
 - Services never import Express or Drizzle query builders directly, they call repositories
-- Repositories never throw HTTP errors, they return data or null
+- Repositories never throw HTTP errors, they return data or null. The one exception is a database error they understand: a unique email violation becomes `EmailTakenError`. No SELECT before an insert to check, the constraint decides
 - Services throw domain errors. One error middleware maps them to HTTP status codes
 - Pages in `app/` only compose feature components. Data fetching and state live in hooks
 - No extra abstractions without a real need: no DI container, no generic base repository
