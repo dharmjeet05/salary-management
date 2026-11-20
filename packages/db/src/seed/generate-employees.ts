@@ -38,6 +38,31 @@ function hireDate(random: Random) {
   return new Date(start + random.int(0, days) * DAY_MS).toISOString().slice(0, 10)
 }
 
+type PersonName = { firstName: string; lastName: string }
+
+// Every full name once: each country walks its own shuffled list of every
+// first and last name pair, and skips a name another country already took.
+function createNamePicker(random: Random) {
+  const taken = new Set<string>()
+  const queues = new Map(
+    COUNTRIES.map(({ code }) => {
+      const { firstNames, lastNames } = COUNTRY_SEED[code]
+      const pairs = firstNames.flatMap((firstName) =>
+        lastNames.map((lastName): PersonName => ({ firstName, lastName })),
+      )
+      return [code, random.shuffle(pairs)]
+    }),
+  )
+  return (country: CountryCode): PersonName => {
+    const queue = queues.get(country) ?? []
+    let name = queue.pop()
+    while (name && taken.has(`${name.firstName} ${name.lastName}`)) name = queue.pop()
+    if (!name) throw new Error(`Not enough different names for ${country}, add more to the seed`)
+    taken.add(`${name.firstName} ${name.lastName}`)
+    return name
+  }
+}
+
 const departmentChoices = DEPARTMENTS.map((department) => ({
   value: department.name,
   weight: DEPARTMENT_WEIGHTS[department.name],
@@ -45,10 +70,10 @@ const departmentChoices = DEPARTMENTS.map((department) => ({
 
 export function generateEmployees({ count, seed }: { count: number; seed: number }) {
   const random = createRandom(seed)
+  const pickName = createNamePicker(random)
   return countryOrder(count, random).map((country, index): NewEmployeeRow => {
     const place = COUNTRY_SEED[country]
-    const firstName = random.pick(place.firstNames)
-    const lastName = random.pick(place.lastNames)
+    const { firstName, lastName } = pickName(country)
     const department = random.weighted(departmentChoices)
     const jobTitle = random.weighted(
       jobTitlesForDepartment(department).map((title) => ({
