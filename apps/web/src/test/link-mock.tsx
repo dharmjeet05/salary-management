@@ -9,11 +9,13 @@ export default function Link({
   prefetch,
   className,
   children,
+  'aria-current': ariaCurrent,
 }: ComponentProps<typeof NextLink>) {
   return (
     <a
       href={typeof href === 'string' ? href : (href.pathname ?? '')}
       className={className}
+      aria-current={ariaCurrent}
       data-prefetch={prefetch === false ? 'off' : 'on'}
     >
       {children}
