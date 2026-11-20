@@ -6,9 +6,10 @@ const envSchema = z.object({
   // compares strings, so keep only the origin part of whatever was set.
   CORS_ORIGIN: z.url({ protocol: /^https?$/ }).transform((url) => new URL(url).origin),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  BUILD_TAG: z.string().trim().min(1).default('dev'),
 })
 
-export type Env = { port: number; corsOrigin: string; databaseUrl: string }
+export type Env = { port: number; corsOrigin: string; databaseUrl: string; buildTag: string }
 
 export function loadEnv(source: Record<string, string | undefined> = process.env): Env {
   const result = envSchema.safeParse(source)
@@ -22,5 +23,6 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     port: result.data.PORT,
     corsOrigin: result.data.CORS_ORIGIN,
     databaseUrl: result.data.DATABASE_URL,
+    buildTag: result.data.BUILD_TAG,
   }
 }
