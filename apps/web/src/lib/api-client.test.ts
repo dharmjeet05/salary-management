@@ -51,6 +51,13 @@ describe('api client', () => {
     expect(lastRequest().url).toBe('http://api.test/api/employees/1')
   })
 
+  it('keeps a path prefix in the api url, like the one on the vps', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'https://dharmjeet.com/salary-management/')
+    fetchMock.mockResolvedValue(jsonResponse(200, asha))
+    await apiFetch('/api/employees/1', employeeSchema)
+    expect(lastRequest().url).toBe('https://dharmjeet.com/salary-management/api/employees/1')
+  })
+
   it('puts the query in the url and leaves out empty values', async () => {
     fetchMock.mockResolvedValue(jsonResponse(200, asha))
     await apiFetch('/api/employees/1', employeeSchema, {
