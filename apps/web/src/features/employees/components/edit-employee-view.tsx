@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ApiError } from '@/lib/api-client'
 import { useEmployee } from '../hooks/use-employee'
 import { useUpdateEmployee } from '../hooks/use-employee-mutations'
+import { useReturnPath } from '../hooks/use-return-path'
 import { DeleteEmployeeButton } from './delete-employee-button'
 import { EmployeeForm } from './employee-form'
 
@@ -23,7 +24,8 @@ function NotFound() {
 }
 
 function EditForm({ employee }: { employee: Employee }) {
-  const update = useUpdateEmployee(employee.id)
+  const returnTo = useReturnPath()
+  const update = useUpdateEmployee(employee.id, returnTo)
   return (
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold tracking-tight">{employee.fullName}</h1>
@@ -35,10 +37,10 @@ function EditForm({ employee }: { employee: Employee }) {
         onSubmit={(values) => update.mutateAsync(values)}
       >
         <Button asChild variant="ghost">
-          <Link href="/employees">Cancel</Link>
+          <Link href={returnTo}>Cancel</Link>
         </Button>
         <div className="ml-auto">
-          <DeleteEmployeeButton employee={employee} />
+          <DeleteEmployeeButton employee={employee} returnTo={returnTo} />
         </div>
       </EmployeeForm>
     </section>

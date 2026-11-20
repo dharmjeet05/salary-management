@@ -8,9 +8,10 @@ import { createEmployee, deleteEmployee, updateEmployee } from '../api/employees
 import { employeeQueryKey } from './use-employee'
 
 // Every change ends the same way: the list is refetched so it never shows old
-// data, a toast says what happened, and the person is back on the list.
+// data, a toast says what happened, and the person is back on the list they
+// came from.
 
-export function useCreateEmployee() {
+export function useCreateEmployee(returnTo: string) {
   const queryClient = useQueryClient()
   const router = useRouter()
   return useMutation({
@@ -19,12 +20,12 @@ export function useCreateEmployee() {
       queryClient.setQueryData(employeeQueryKey(employee.id), employee)
       await queryClient.invalidateQueries({ queryKey: ['employees'] })
       toast.success(`${employee.fullName} was added`)
-      router.push('/employees')
+      router.push(returnTo)
     },
   })
 }
 
-export function useUpdateEmployee(id: number) {
+export function useUpdateEmployee(id: number, returnTo: string) {
   const queryClient = useQueryClient()
   const router = useRouter()
   return useMutation({
@@ -33,12 +34,12 @@ export function useUpdateEmployee(id: number) {
       queryClient.setQueryData(employeeQueryKey(id), employee)
       await queryClient.invalidateQueries({ queryKey: ['employees'] })
       toast.success(`Changes to ${employee.fullName} were saved`)
-      router.push('/employees')
+      router.push(returnTo)
     },
   })
 }
 
-export function useDeleteEmployee(employee: Employee) {
+export function useDeleteEmployee(employee: Employee, returnTo: string) {
   const queryClient = useQueryClient()
   const router = useRouter()
   return useMutation({
@@ -47,7 +48,7 @@ export function useDeleteEmployee(employee: Employee) {
       queryClient.removeQueries({ queryKey: employeeQueryKey(employee.id) })
       await queryClient.invalidateQueries({ queryKey: ['employees'] })
       toast.success(`${employee.fullName} was deleted`)
-      router.push('/employees')
+      router.push(returnTo)
     },
   })
 }

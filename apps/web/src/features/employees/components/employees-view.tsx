@@ -8,7 +8,8 @@ import { ApiError } from '@/lib/api-client'
 import { useEmployeeListParams } from '../hooks/use-employee-list-params'
 import { useEmployees } from '../hooks/use-employees'
 import { useSearchInput } from '../hooks/use-search-input'
-import { sortChange } from '../list-params'
+import { sortChange, writeListParams } from '../list-params'
+import { withReturnTo } from '../return-to'
 import { EmployeeFilters } from './employee-filters'
 import { EmployeePagination } from './employee-pagination'
 import { EmployeeTable } from './employee-table'
@@ -42,6 +43,8 @@ export function EmployeesView() {
   const search = useSearchInput(params.search, (value) => {
     setParams({ search: value })
   })
+  const listQuery = writeListParams(params)
+  const returnTo = listQuery ? `/employees?${listQuery}` : '/employees'
   const hasFilters = Boolean(
     params.search ?? params.country ?? params.department ?? params.jobTitle,
   )
@@ -56,7 +59,7 @@ export function EmployeesView() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/employees/new">
+          <Link href={withReturnTo('/employees/new', returnTo)}>
             <Plus aria-hidden />
             Add employee
           </Link>
@@ -114,6 +117,7 @@ export function EmployeesView() {
               sortBy={params.sortBy}
               sortOrder={params.sortOrder}
               canSortBySalary={params.country !== undefined}
+              returnTo={returnTo}
               onSort={(field) => {
                 setParams(sortChange(params, field))
               }}

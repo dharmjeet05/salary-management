@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatDate, formatMoney } from '@/lib/format'
+import { withReturnTo } from '../return-to'
 
 const countryNames = new Map(COUNTRIES.map((country) => [country.code, country.name]))
 
@@ -20,6 +21,7 @@ type EmployeeTableProps = {
   sortOrder: SortOrder
   canSortBySalary: boolean
   onSort: (field: SortField) => void
+  returnTo?: string
 }
 
 type SortHeaderProps = {
@@ -73,6 +75,7 @@ export function EmployeeTable({
   sortOrder,
   canSortBySalary,
   onSort,
+  returnTo = '/employees',
 }: EmployeeTableProps) {
   const sortProps = { sortBy, sortOrder, onSort }
   return (
@@ -98,7 +101,7 @@ export function EmployeeTable({
           <TableRow key={employee.id}>
             <TableCell>
               <Link
-                href={`/employees/${String(employee.id)}/edit`}
+                href={withReturnTo(`/employees/${String(employee.id)}/edit`, returnTo)}
                 className="font-medium underline-offset-4 hover:underline"
               >
                 {employee.fullName}

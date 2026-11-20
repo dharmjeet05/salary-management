@@ -16,8 +16,14 @@ import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api-client'
 import { useDeleteEmployee } from '../hooks/use-employee-mutations'
 
-export function DeleteEmployeeButton({ employee }: { employee: Employee }) {
-  const remove = useDeleteEmployee(employee)
+export function DeleteEmployeeButton({
+  employee,
+  returnTo,
+}: {
+  employee: Employee
+  returnTo: string
+}) {
+  const remove = useDeleteEmployee(employee, returnTo)
   return (
     <AlertDialog
       onOpenChange={(open) => {
