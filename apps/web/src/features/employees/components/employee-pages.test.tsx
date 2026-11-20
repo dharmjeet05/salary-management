@@ -19,8 +19,13 @@ vi.mock('../api/employees-api', () => ({
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn() } }))
 
-const router = vi.hoisted(() => ({ push: vi.fn() }))
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: router.push }) }))
+const router = vi.hoisted(() => ({ push: vi.fn(), search: '' }))
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: router.push }),
+  useSearchParams: () => new URLSearchParams(router.search),
+}))
+
+const fromFilteredList = `from=${encodeURIComponent('/employees?country=IN&page=3')}`
 
 const asha: Employee = {
   id: 1,
@@ -41,6 +46,7 @@ function renderWithQuery(ui: ReactNode) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  router.search = ''
 })
 
 describe('adding an employee', () => {
@@ -108,6 +114,55 @@ describe('changing an employee', () => {
     renderWithQuery(<EditEmployeeView id="abc" />)
     expect(await screen.findByText('Employee not found')).toBeInTheDocument()
     expect(fetchEmployee).not.toHaveBeenCalled()
+  })
+})
+
+describe('going back to the list it came from', () => {
+  it('returns to the filtered list after saving', async () => {
+    router.search = fromFilteredList
+    vi.mocked(fetchEmployee).mockResolvedValue(asha)
+    vi.mocked(updateEmployee).mockResolvedValue(asha)
+    renderWithQuery(<EditEmployeeView id="1" />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Save changes' }))
+    expect(router.push).toHaveBeenCalledWith('/employees?country=IN&page=3')
+  })
+
+  it('returns to the filtered list after deleting', async () => {
+    router.search = fromFilteredList
+    vi.mocked(fetchEmployee).mockResolvedValue(asha)
+    vi.mocked(deleteEmployee).mockResolvedValue()
+    renderWithQuery(<EditEmployeeView id="1" />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete Asha Patel' }))
+    expect(router.push).toHaveBeenCalledWith('/employees?country=IN&page=3')
+  })
+
+  it('points cancel on the edit page at the filtered list', async () => {
+    router.search = fromFilteredList
+    vi.mocked(fetchEmployee).mockResolvedValue(asha)
+    renderWithQuery(<EditEmployeeView id="1" />)
+    expect(await screen.findByRole('link', { name: 'Cancel' })).toHaveAttribute(
+      'href',
+      '/employees?country=IN&page=3',
+    )
+  })
+
+  it('points cancel on the add page at the filtered list', () => {
+    router.search = fromFilteredList
+    renderWithQuery(<NewEmployeeView />)
+    expect(screen.getByRole('link', { name: 'Cancel' })).toHaveAttribute(
+      'href',
+      '/employees?country=IN&page=3',
+    )
+  })
+
+  it('ignores a return link to another site', async () => {
+    router.search = `from=${encodeURIComponent('https://evil.example')}`
+    vi.mocked(fetchEmployee).mockResolvedValue(asha)
+    vi.mocked(updateEmployee).mockResolvedValue(asha)
+    renderWithQuery(<EditEmployeeView id="1" />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Save changes' }))
+    expect(router.push).toHaveBeenCalledWith('/employees')
   })
 })
 

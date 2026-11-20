@@ -69,6 +69,16 @@ describe('employees page', () => {
     )
   })
 
+  it('remembers the filtered list in the Add employee link', () => {
+    router.search = 'country=IN'
+    fetchEmployeesMock.mockReturnValue(new Promise(() => undefined))
+    renderView()
+    expect(screen.getByRole('link', { name: 'Add employee' })).toHaveAttribute(
+      'href',
+      '/employees/new?from=%2Femployees%3Fcountry%3DIN',
+    )
+  })
+
   it('shows the employees once they load', async () => {
     fetchEmployeesMock.mockResolvedValue(onePage)
     renderView()
