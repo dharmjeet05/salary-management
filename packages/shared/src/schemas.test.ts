@@ -245,6 +245,19 @@ describe('listing employees', () => {
     expect(firstIssue(result).path).toBe('country')
   })
 
+  it('sorts by salary when a country is picked', () => {
+    const result = employeeListQuerySchema.safeParse({ country: 'IN', sortBy: 'annualSalary' })
+    expect(result.success).toBe(true)
+  })
+
+  it('refuses to sort by salary across countries', () => {
+    const result = employeeListQuerySchema.safeParse({ sortBy: 'annualSalary' })
+    expect(firstIssue(result)).toEqual({
+      path: 'sortBy',
+      message: 'Pick a country to sort by salary, since each country pays in its own currency',
+    })
+  })
+
   it('rejects sorting by a column that is not offered', () => {
     const result = employeeListQuerySchema.safeParse({ sortBy: 'email' })
     expect(firstIssue(result).path).toBe('sortBy')
