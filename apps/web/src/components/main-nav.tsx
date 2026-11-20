@@ -18,8 +18,11 @@ export function MainNav() {
           const isActive = pathname === section.href || pathname.startsWith(`${section.href}/`)
           return (
             <li key={section.href}>
+              {/* No prefetch: Next prefetches again on every url change, so each
+                  search or filter would fetch both sections. Hover still does */}
               <Link
                 href={section.href}
+                prefetch={false}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'rounded-md px-3 py-2 text-sm font-medium transition-colors',
