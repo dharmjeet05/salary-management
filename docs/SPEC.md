@@ -180,7 +180,6 @@ docs/
   ai-usage.md          how AI tools were used, prompts, what was fixed by hand
   tradeoffs.md         decisions and what was given up, performance
   deploy.md            steps for the VPS
-  demo-script.md       the walkthrough for the demo video
 ```
 
 ### Request flow

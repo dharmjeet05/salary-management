@@ -24,7 +24,6 @@ Every list and filter lives in the URL, so a view can be bookmarked or shared, a
 | Trade-offs and performance | [docs/tradeoffs.md](docs/tradeoffs.md)                                                                                                                                                                                   |
 | Rules for the AI agent     | [CLAUDE.md](CLAUDE.md)                                                                                                                                                                                                   |
 | Deploy                     | [docs/deploy.md](docs/deploy.md)                                                                                                                                                                                         |
-| Demo video script          | [docs/demo-script.md](docs/demo-script.md)                                                                                                                                                                               |
 | How it evolved             | [issues](https://github.com/dharmjeet05/salary-management/issues?q=is%3Aissue), [pull requests](https://github.com/dharmjeet05/salary-management/pulls?q=is%3Apr+is%3Amerged) with their reviews, and the commit history |
 
 Each task was a GitHub issue, built on its own branch, test first, reviewed on its PR and merged with a merge commit, so the history shows every step.
