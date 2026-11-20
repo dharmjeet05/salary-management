@@ -1,5 +1,7 @@
 'use client'
 
+import { Plus } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ApiError } from '@/lib/api-client'
@@ -46,11 +48,19 @@ export function EmployeesView() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
-        <p className="text-muted-foreground h-5 text-sm">
-          {list.data ? countLabel(list.data.total) : null}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
+          <p className="text-muted-foreground h-5 text-sm">
+            {list.data ? countLabel(list.data.total) : null}
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/employees/new">
+            <Plus aria-hidden />
+            Add employee
+          </Link>
+        </Button>
       </div>
 
       <EmployeeFilters

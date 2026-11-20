@@ -1,5 +1,6 @@
 import { COUNTRIES, type Employee, type SortField, type SortOrder } from '@salary/shared'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -96,7 +97,12 @@ export function EmployeeTable({
         {employees.map((employee) => (
           <TableRow key={employee.id}>
             <TableCell>
-              <div className="font-medium">{employee.fullName}</div>
+              <Link
+                href={`/employees/${String(employee.id)}/edit`}
+                className="font-medium underline-offset-4 hover:underline"
+              >
+                {employee.fullName}
+              </Link>
               <div className="text-muted-foreground text-xs">{employee.email}</div>
             </TableCell>
             <TableCell>{countryNames.get(employee.country)}</TableCell>
