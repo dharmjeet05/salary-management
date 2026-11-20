@@ -1,16 +1,21 @@
 import { createTestDb, resetDb, type TestDb } from '@salary/db/testing'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmailTakenError, NotFoundError, ValidationError } from '../errors/domain-errors'
-import { createEmployeeRepository } from '../repositories/employee-repository'
+import {
+  createEmployeeRepository,
+  type EmployeeRepository,
+} from '../repositories/employee-repository'
 import { employeeInput } from '../test/fixtures'
 import { createEmployeeService, type EmployeeService } from './employee-service'
 
 let testDb: TestDb
+let repository: EmployeeRepository
 let service: EmployeeService
 
 beforeAll(async () => {
   testDb = await createTestDb()
-  service = createEmployeeService(createEmployeeRepository(testDb.db))
+  repository = createEmployeeRepository(testDb.db)
+  service = createEmployeeService(repository)
 })
 
 afterAll(async () => {
@@ -19,6 +24,10 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await resetDb(testDb.db)
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe('adding an employee', () => {
@@ -66,6 +75,13 @@ describe('changing an employee', () => {
     const { id } = await service.create(employeeInput())
     const updated = await service.update(id, { annualSalary: 2000000 })
     expect(updated.annualSalary).toBe(2000000)
+  })
+
+  it('changes a salary with one query, without reading the row first', async () => {
+    const { id } = await service.create(employeeInput())
+    const findById = vi.spyOn(repository, 'findById')
+    await service.update(id, { annualSalary: 2000000 })
+    expect(findById).not.toHaveBeenCalled()
   })
 
   it('changes the currency when the country changes', async () => {
