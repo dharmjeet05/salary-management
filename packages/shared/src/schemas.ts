@@ -28,12 +28,12 @@ const jobTitleSchema = z.enum(JOB_TITLES, { error: 'Pick a job title from the li
 
 const employeeFields = {
   fullName: z
-    .string()
+    .string({ error: 'Enter a name' })
     .trim()
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name must be at most 100 characters'),
   email: z
-    .string()
+    .string({ error: 'Enter an email' })
     .trim()
     .toLowerCase()
     .pipe(
