@@ -19,6 +19,10 @@ describe('retrying a failed request', () => {
     expect(shouldRetry(0, new ApiError(0, 'NETWORK_ERROR', 'x'))).toBe(true)
   })
 
+  it('does not retry an error that never reached the api, like a missing api url', () => {
+    expect(shouldRetry(0, new Error('NEXT_PUBLIC_API_URL must be set to the api url'))).toBe(false)
+  })
+
   it('gives up after two retries', () => {
     expect(shouldRetry(2, new ApiError(0, 'NETWORK_ERROR', 'x'))).toBe(false)
   })
