@@ -53,6 +53,14 @@ describe('employee table', () => {
     expect(within(row).getByText('asha.patel@acme.test')).toBeInTheDocument()
   })
 
+  it('links each name to that employee', () => {
+    renderTable()
+    expect(screen.getByRole('link', { name: 'Asha Patel' })).toHaveAttribute(
+      'href',
+      '/employees/1/edit',
+    )
+  })
+
   it('marks the column the list is sorted by', () => {
     renderTable()
     expect(screen.getByRole('columnheader', { name: /Name/ })).toHaveAttribute(

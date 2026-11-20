@@ -60,6 +60,15 @@ describe('employees page', () => {
     expect(screen.getByRole('status', { name: 'Loading employees' })).toBeInTheDocument()
   })
 
+  it('offers to add an employee', () => {
+    fetchEmployeesMock.mockReturnValue(new Promise(() => undefined))
+    renderView()
+    expect(screen.getByRole('link', { name: 'Add employee' })).toHaveAttribute(
+      'href',
+      '/employees/new',
+    )
+  })
+
   it('shows the employees once they load', async () => {
     fetchEmployeesMock.mockResolvedValue(onePage)
     renderView()
