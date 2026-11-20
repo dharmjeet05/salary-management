@@ -19,7 +19,7 @@ export function MainNav() {
           return (
             <li key={section.href}>
               {/* No prefetch: Next prefetches again on every url change, so each
-                  search or filter would fetch both sections. Hover still does */}
+                  search or filter would fetch both sections. They load on click */}
               <Link
                 href={section.href}
                 prefetch={false}
