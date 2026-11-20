@@ -1,4 +1,5 @@
 import { createTestDb, resetDb, type TestDb } from '@salary/db/testing'
+import { employeeListQuerySchema } from '@salary/shared'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmailTakenError, NotFoundError, ValidationError } from '../errors/domain-errors'
 import {
@@ -147,5 +148,28 @@ describe('removing an employee', () => {
 
   it('says not found for an id that does not exist', async () => {
     await expect(service.delete(999)).rejects.toBeInstanceOf(NotFoundError)
+  })
+})
+
+describe('listing employees', () => {
+  it('returns the employees with the page, the page size and the total', async () => {
+    await service.create(employeeInput())
+    await service.create(employeeInput({ fullName: 'Ravi Kumar', email: 'ravi.kumar@acme.test' }))
+    const result = await service.list(employeeListQuerySchema.parse({ pageSize: 10 }))
+    expect(result).toEqual({
+      data: [
+        expect.objectContaining({ fullName: 'Asha Patel' }),
+        expect.objectContaining({ fullName: 'Ravi Kumar' }),
+      ],
+      page: 1,
+      pageSize: 10,
+      total: 2,
+    })
+  })
+
+  it('leaves the timestamps out of every listed employee', async () => {
+    await service.create(employeeInput())
+    const { data } = await service.list(employeeListQuerySchema.parse({}))
+    expect(data[0]).not.toHaveProperty('createdAt')
   })
 })

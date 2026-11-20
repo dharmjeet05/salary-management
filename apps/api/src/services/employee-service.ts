@@ -5,6 +5,8 @@ import {
   jobTitleNotInDepartmentMessage,
   type CreateEmployeeInput,
   type Employee,
+  type EmployeeListQuery,
+  type EmployeeListResponse,
   type UpdateEmployeeInput,
 } from '@salary/shared'
 import { NotFoundError, ValidationError } from '../errors/domain-errors'
@@ -30,6 +32,11 @@ export function createEmployeeService(repository: EmployeeRepository) {
       const row = await repository.findById(id)
       if (!row) throw new NotFoundError('Employee')
       return toEmployee(row)
+    },
+
+    async list(query: EmployeeListQuery): Promise<EmployeeListResponse> {
+      const { rows, total } = await repository.list(query)
+      return { data: rows.map(toEmployee), page: query.page, pageSize: query.pageSize, total }
     },
 
     async create(input: CreateEmployeeInput): Promise<Employee> {

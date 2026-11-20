@@ -85,21 +85,28 @@ export const updateEmployeeSchema = z
   )
   .superRefine(checkJobTitleInDepartment)
 
-export const employeeListQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().pipe(z.literal(PAGE_SIZES)).default(25),
-  search: z
-    .string()
-    .trim()
-    .transform((value) => (value === '' ? undefined : value))
-    .pipe(z.string().min(2, 'Type at least 2 characters to search').max(100).optional())
-    .optional(),
-  country: countrySchema.optional(),
-  department: departmentSchema.optional(),
-  jobTitle: jobTitleSchema.optional(),
-  sortBy: z.enum(SORT_FIELDS).default('fullName'),
-  sortOrder: z.enum(SORT_ORDERS).default('asc'),
-})
+export const employeeListQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().pipe(z.literal(PAGE_SIZES)).default(25),
+    search: z
+      .string()
+      .trim()
+      .transform((value) => (value === '' ? undefined : value))
+      .pipe(z.string().min(2, 'Type at least 2 characters to search').max(100).optional())
+      .optional(),
+    country: countrySchema.optional(),
+    department: departmentSchema.optional(),
+    jobTitle: jobTitleSchema.optional(),
+    sortBy: z.enum(SORT_FIELDS).default('fullName'),
+    sortOrder: z.enum(SORT_ORDERS).default('asc'),
+  })
+  // Salaries are in each country's own currency, so ordering them across
+  // countries would put 3,200,000 INR above 120,000 USD.
+  .refine((query) => query.sortBy !== 'annualSalary' || query.country !== undefined, {
+    path: ['sortBy'],
+    message: 'Pick a country to sort by salary, since each country pays in its own currency',
+  })
 
 export const countryParamSchema = z.object({ country: countrySchema })
 

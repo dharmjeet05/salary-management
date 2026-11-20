@@ -262,6 +262,13 @@ Base path `/api`. JSON in and out.
 | sortBy                        | fullName | fullName, annualSalary, hireDate                     |
 | sortOrder                     | asc      | asc, desc                                            |
 
+- Search is a "contains" match. `%`, `_` and `\` in the search are plain characters, not wildcards
+- Filters and search combine with AND
+- Sorting by name ignores upper and lower case
+- Sorting by salary needs a country filter. Salaries are stored in each country's currency, so a sort across countries would put 3,200,000 INR above 120,000 USD
+- Every sort ends with `id`, so rows with the same salary or date keep one order and never show up on two pages
+- A page past the end returns no rows and the real `total`
+
 ### List response
 
 ```json
