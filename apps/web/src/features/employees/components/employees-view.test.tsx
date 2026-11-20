@@ -80,7 +80,7 @@ describe('employees page', () => {
     )
   })
 
-  it('does not prefetch the add employee page, since its link changes with every filter', () => {
+  it('does not prefetch the add employee page', () => {
     fetchEmployeesMock.mockReturnValue(new Promise(() => undefined))
     renderView()
     expect(screen.getByRole('link', { name: 'Add employee' })).toHaveAttribute(

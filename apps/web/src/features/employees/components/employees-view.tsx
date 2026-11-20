@@ -59,7 +59,7 @@ export function EmployeesView() {
           </p>
         </div>
         <Button asChild>
-          <Link href={withReturnTo('/employees/new', returnTo)}>
+          <Link href={withReturnTo('/employees/new', returnTo)} prefetch={false}>
             <Plus aria-hidden />
             Add employee
           </Link>

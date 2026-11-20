@@ -100,8 +100,11 @@ export function EmployeeTable({
         {employees.map((employee) => (
           <TableRow key={employee.id}>
             <TableCell>
+              {/* No prefetch: the link changes with every search, filter and page,
+                  so each list change would fetch every row's edit page again */}
               <Link
                 href={withReturnTo(`/employees/${String(employee.id)}/edit`, returnTo)}
+                prefetch={false}
                 className="font-medium underline-offset-4 hover:underline"
               >
                 {employee.fullName}
