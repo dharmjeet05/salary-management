@@ -14,9 +14,12 @@ export const SORT_FIELDS = ['fullName', 'annualSalary', 'hireDate'] as const
 export const SORT_ORDERS = ['asc', 'desc'] as const
 export const MAX_ANNUAL_SALARY = 100_000_000
 
-// UTC date, so the rule does not depend on the time zone of the server
-function todayIsoDate() {
-  return new Date().toISOString().slice(0, 10)
+// The date in the furthest ahead time zone (UTC+14). Anything up to it is
+// today somewhere, so an HR manager in India is never told today is in the future.
+const FURTHEST_AHEAD_OFFSET_MS = 14 * 60 * 60 * 1000
+
+function latestAllowedHireDate() {
+  return new Date(Date.now() + FURTHEST_AHEAD_OFFSET_MS).toISOString().slice(0, 10)
 }
 
 const countrySchema = z.enum(COUNTRY_CODES, { error: 'Pick a country from the list' })
@@ -46,7 +49,7 @@ const employeeFields = {
     .max(MAX_ANNUAL_SALARY, 'Salary must be at most 100,000,000'),
   hireDate: z.iso
     .date({ error: 'Enter a date as YYYY-MM-DD' })
-    .refine((date) => date <= todayIsoDate(), 'Hire date cannot be in the future'),
+    .refine((date) => date <= latestAllowedHireDate(), 'Hire date cannot be in the future'),
 }
 
 function checkJobTitleInDepartment(
