@@ -2,7 +2,9 @@ import { z } from 'zod'
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().min(0).max(65535).default(4000),
-  CORS_ORIGIN: z.url(),
+  // Browsers send the origin with no path and no trailing slash, and cors
+  // compares strings, so keep only the origin part of whatever was set.
+  CORS_ORIGIN: z.url({ protocol: /^https?$/ }).transform((url) => new URL(url).origin),
 })
 
 export type Env = { port: number; corsOrigin: string }
