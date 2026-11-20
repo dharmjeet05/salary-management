@@ -61,7 +61,9 @@ export function createInsightsRepository(db: Database) {
           .groupBy(employees.jobTitle),
       )
       const percentOfMedian =
-        sql<number>`round((${salary} * 100 / ${medians.median})::numeric)`.mapWith(Number)
+        // 100.0 first, so the maths isn't integer: 30,000,000 x 100 is past
+        // the 32 bit range
+        sql<number>`round((100.0 * ${salary} / ${medians.median})::numeric)`.mapWith(Number)
       return db
         .with(medians)
         .select({
