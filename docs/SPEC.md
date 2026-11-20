@@ -141,11 +141,12 @@ apps/
   api/                 Express API
     src/
       routes/          URL to controller wiring only
-      controllers/     read request, call service, send response
+      controllers/     parse request with shared Zod schemas, call service, send response
       services/        business rules, no Express, no SQL
       repositories/    all database access, Drizzle queries
-      middleware/      validation, error handler, request logging
-      errors/          domain errors (NotFound, Conflict, Validation)
+      middleware/      error handler, not found handler
+      errors/          domain errors (NotFound, EmailTaken)
+      config/          environment variables, checked on start
       app.ts           builds the Express app (used by tests)
       server.ts        starts the server
   web/                 Next.js app
@@ -177,12 +178,13 @@ flowchart LR
   UI[Next.js page] --> Hook[Query hook]
   Hook --> Client[api client]
   Client -->|HTTP JSON| Route[Express route]
-  Route --> Val[Zod validation]
-  Val --> Ctrl[Controller]
-  Ctrl --> Svc[Service]
+  Route --> Ctrl[Controller]
+  Ctrl --> Val[Zod parse]
+  Val --> Svc[Service]
   Svc --> Repo[Repository]
   Repo --> DB[(PostgreSQL)]
-  Svc -. domain error .-> Err[Error middleware]
+  Val -. invalid input .-> Err[Error middleware]
+  Svc -. domain error .-> Err
   Err -->|status + error body| Client
 ```
 
@@ -190,6 +192,7 @@ flowchart LR
 
 - Routes only map URLs to controllers
 - Controllers never contain business rules or SQL
+- Controllers parse params, query and body with the shared Zod schemas. A parse error goes to the error middleware and becomes a 400. There is no separate validation middleware, because Express 5 makes `req.query` read only and a middleware would lose the parsed type
 - Services never import Express or Drizzle query builders directly, they call repositories
 - Repositories never throw HTTP errors, they return data or null
 - Services throw domain errors. One error middleware maps them to HTTP status codes
@@ -406,7 +409,7 @@ Each line becomes one GitHub issue, done in this order.
 2. Monorepo setup: pnpm, Turborepo, shared tsconfig and eslint, empty `apps/api` and `apps/web`, CI workflow, `CLAUDE.md`
 3. `packages/shared`: constants, Zod schemas, types, tests
 4. `packages/db`: Drizzle schema, first migration, client, PGlite test helper
-5. API skeleton: `app.ts`, health route, error middleware, validation middleware, domain errors, tests
+5. API skeleton: `app.ts`, health route, error middleware, domain errors, env config, tests
 6. Employees: repository and service for get, create, update, delete, tests first
 7. Employees: list with pagination, search, filters, sort, tests first
 8. Employees: routes and controllers, `/api/meta`, Supertest tests
